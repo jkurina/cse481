@@ -13,7 +13,7 @@ from python_qt_binding.QtGui import QGroupBox
 from python_qt_binding.QtCore import QSignalMapper, qWarning, Signal
 from sound_play.msg import SoundRequest
 from sound_play.libsoundplay import SoundClient
-
+from gripper import Gripper
 
 class SimpleGUI(Plugin):
 
@@ -33,11 +33,19 @@ class SimpleGUI(Plugin):
         large_box = QtGui.QVBoxLayout()
         
 	button_box = QtGui.QHBoxLayout()
-        button_box.addWidget(self.create_button('Say something'))
+        button_box.addWidget(self.create_button('Say something',
+		self.command_cb))
 	button_box.addStretch(1)
         large_box.addLayout(button_box)
 	large_box.addItem(QtGui.QSpacerItem(100,20))
-        
+	
+	gripper = Gripper(Gripper.RIGHT, Gripper.OPEN)
+	right_gripper = self.create_button('Right gripper!', gripper.create_closure())
+        gripper = Gripper(Gripper.LEFT, Gripper.OPEN)
+        left_gripper = self.create_button('Left gripper!', gripper.create_closure()) 
+	large_box.addWidget(left_gripper)
+        large_box.addWidget(right_gripper)
+       
         speech_box = QtGui.QHBoxLayout()
         self.speech_label = QtGui.QLabel('Robot has not spoken yet')
         palette = QtGui.QPalette()
@@ -56,9 +64,9 @@ class SimpleGUI(Plugin):
         qWarning('Received sound.')
         self.sound_sig.emit(sound_request)
         
-    def create_button(self, name):
+    def create_button(self, name, method):
         btn = QtGui.QPushButton(name, self._widget)
-        btn.clicked.connect(self.command_cb)
+	btn.clicked.connect(method)
         return btn
 
     def sound_sig_cb(self, sound_request):
