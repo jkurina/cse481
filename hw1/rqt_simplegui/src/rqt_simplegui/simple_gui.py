@@ -14,6 +14,7 @@ from python_qt_binding.QtCore import QSignalMapper, qWarning, Signal
 from sound_play.msg import SoundRequest
 from sound_play.libsoundplay import SoundClient
 from gripper import Gripper
+from head import Head
 
 class SimpleGUI(Plugin):
 
@@ -45,6 +46,19 @@ class SimpleGUI(Plugin):
         left_gripper = self.create_button('Left gripper!', gripper.create_closure()) 
         large_box.addWidget(left_gripper)
         large_box.addWidget(right_gripper)
+
+        up_head = Head(Head.UP)
+        up_head_button = self.create_button('up head', up_head.create_closure())
+        large_box.addWidget(up_head_button)
+        down_head = Head(Head.DOWN)
+        down_head_button = self.create_button('down head', down_head.create_closure())
+        large_box.addWidget(down_head_button)
+        right_head = Head(Head.RIGHT)
+        right_head_button = self.create_button('right head', right_head.create_closure())
+        large_box.addWidget(right_head_button)
+        left_head = Head(Head.LEFT)
+        left_head_button = self.create_button('left head', left_head.create_closure())
+        large_box.addWidget(left_head_button)
        
         speech_box = QtGui.QHBoxLayout()
         self.speech_label = QtGui.QLabel('Robot has not spoken yet')
