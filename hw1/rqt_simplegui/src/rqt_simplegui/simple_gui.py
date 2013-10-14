@@ -32,18 +32,18 @@ class SimpleGUI(Plugin):
         
         large_box = QtGui.QVBoxLayout()
         
-	button_box = QtGui.QHBoxLayout()
+        button_box = QtGui.QHBoxLayout()
         button_box.addWidget(self.create_button('Say something',
-		self.command_cb))
-	button_box.addStretch(1)
+                self.command_cb))
+        button_box.addStretch(1)
         large_box.addLayout(button_box)
-	large_box.addItem(QtGui.QSpacerItem(100,20))
-	
-	gripper = Gripper(Gripper.RIGHT, Gripper.OPEN)
-	right_gripper = self.create_button('Right gripper!', gripper.create_closure())
+        large_box.addItem(QtGui.QSpacerItem(100,20))
+        
+        gripper = Gripper(Gripper.RIGHT, Gripper.OPEN)
+        right_gripper = self.create_button('Right gripper!', gripper.create_closure())
         gripper = Gripper(Gripper.LEFT, Gripper.OPEN)
         left_gripper = self.create_button('Left gripper!', gripper.create_closure()) 
-	large_box.addWidget(left_gripper)
+        large_box.addWidget(left_gripper)
         large_box.addWidget(right_gripper)
        
         speech_box = QtGui.QHBoxLayout()
@@ -54,7 +54,7 @@ class SimpleGUI(Plugin):
         speech_box.addWidget(self.speech_label)
 
         large_box.addLayout(speech_box)
-	large_box.addStretch(1)
+        large_box.addStretch(1)
 
         self._widget.setObjectName('SimpleGUI')
         self._widget.setLayout(large_box)
@@ -66,7 +66,7 @@ class SimpleGUI(Plugin):
         
     def create_button(self, name, method):
         btn = QtGui.QPushButton(name, self._widget)
-	btn.clicked.connect(method)
+        btn.clicked.connect(method)
         return btn
 
     def sound_sig_cb(self, sound_request):
