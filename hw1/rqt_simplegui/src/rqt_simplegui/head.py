@@ -22,9 +22,20 @@ class Head():
             or direction == Head.UP or direction == Head.DOWN)
         self.direction = direction
 
+    def get_frame(self):
+        return 'head_tilt_link'
+
     def get_target(self):
-        # TODO: figure out what this means.
-        return Point(1, 1, 1.35)
+        point = Point(0, 0, 0)
+        if (self.direction == Head.LEFT):
+            point = Point(1, 0.4, 0)
+        elif (self.direction == Head.RIGHT):
+            point = Point(1, -0.4, 0)
+        elif (self.direction == Head.UP):
+            point = Point(1, 0, 0.4)
+        else:  # Head.DOWN
+            point = Point(1, 0, -0.4)
+        return point
 
     def create_closure(self):
         def move_head():
@@ -34,8 +45,8 @@ class Head():
             head_client.wait_for_server()
 
             head_goal = PointHeadGoal()
-            head_goal.target.header.frame_id = 'base_link'
-            head_goal.min_duration = rospy.Duration(1.0)
+            head_goal.target.header.frame_id = self.get_frame()
+            # head_goal.min_duration = rospy.Duration(1.0)
             head_goal.target.point = self.get_target()
             head_client.send_goal(head_goal)
             head_client.wait_for_result(rospy.Duration(10.0)) # check this

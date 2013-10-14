@@ -14,16 +14,16 @@ class Base():
     BACKWARD = 'b'
     LEFT = 'l'
     RIGHT = 'r'
-    TURNLEFT = 'tl'
-    TURNRIGHT = 'tr'
+    CLOCKWISE = 'cl'
+    COUNTER = 'cr'
     
     def __init__(self, direction):   
         assert(direction == Base.FORWARD or 
                direction == Base.BACKWARD or
                direction == Base.LEFT or
                direction == Base.RIGHT or
-               direction == Base.TURNLEFT or
-               direction == Base.TURNRIGHT)
+               direction == Base.CLOCKWISE or
+               direction == Base.COUNTER)
         self.direction = direction
 
     def create_closure(self):
@@ -38,15 +38,17 @@ class Base():
                 twist_msg.linear = Vector3(1.0, 0.0, 0.0)
                 twist_msg.angular = Vector3(0.0, 0.0, 0.0)
             elif(self.direction == Base.BACKWARD):
-                twist_msg.linear = Vector3(-100.0, 0.0, 0.0)
+                twist_msg.linear = Vector3(-1.0, 0.0, 0.0)
                 twist_msg.angular = Vector3(0.0, 0.0, 0.0)
-            elif(self.direction == Base.TURNLEFT):
-                print "turning left"
+            elif(self.direction == Base.CLOCKWISE):
                 twist_msg.linear = Vector3(0.0, 0.0, 0.0)
-                twist_msg.angular = Vector3(0.0, 0.0, -10.0);
+                twist_msg.angular = Vector3(0.0, 0.0, -1.0);
+            elif(self.direction == Base.COUNTER):
+                twist_msg.linear = Vector3(0.0, 0.0, 0.0)
+                twist_msg.angular = Vector3(0.0, 0.0, 1.0);
 
             
-            for i in range(100):
+            for i in range(10):
                 base_publisher.publish(twist_msg)
                 time.sleep(0.1)
 
