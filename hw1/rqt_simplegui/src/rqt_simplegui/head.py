@@ -32,9 +32,9 @@ class Head():
         elif (self.direction == Head.RIGHT):
             point = Point(1, -0.4, 0)
         elif (self.direction == Head.UP):
-            point = Point(1, 0, 0.4)
+            point = Point(1, 0, 0.2)
         else:  # Head.DOWN
-            point = Point(1, 0, -0.4)
+            point = Point(1, 0, -0.2)
         return point
 
     def create_closure(self):
@@ -46,10 +46,11 @@ class Head():
 
             head_goal = PointHeadGoal()
             head_goal.target.header.frame_id = self.get_frame()
-            # head_goal.min_duration = rospy.Duration(1.0)
+            head_goal.min_duration = rospy.Duration(1.0)
             head_goal.target.point = self.get_target()
+            head_goal.max_velocity = 0.1 # TODO: fiddle with this
             head_client.send_goal(head_goal)
-            head_client.wait_for_result(rospy.Duration(10.0)) # check this
+            head_client.wait_for_result(rospy.Duration(10.0))
 
             if (head_client.get_state() != GoalStatus.SUCCEEDED):
                 rospy.logwarn('Head action unsuccessful.')
