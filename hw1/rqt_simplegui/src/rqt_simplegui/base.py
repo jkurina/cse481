@@ -49,9 +49,9 @@ class Base():
             elif(self.direction == Base.COUNTER):
                 twist_msg.linear = Vector3(0.0, 0.0, 0.0)
                 twist_msg.angular = Vector3(0.0, 0.0, 1.0);
-            elif(self.direction == Base.COUNTER):
+            elif(self.direction == Base.CLOCKWISE):
                 twist_msg.linear = Vector3(0.0, 0.0, 0.0)
-                twist_msg.angular = Vector3(0.0, 0.0, 1.0);
+                twist_msg.angular = Vector3(0.0, 0.0, -1.0);
 
             
             for i in range(10):
