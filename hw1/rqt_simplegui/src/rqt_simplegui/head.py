@@ -36,7 +36,7 @@ class Head():
             head_goal = PointHeadGoal()
             head_goal.target.header.frame_id = 'base_link'
             head_goal.min_duration = rospy.Duration(1.0)
-            head_goal.target.point = get_target()
+            head_goal.target.point = self.get_target()
             head_client.send_goal(head_goal)
             head_client.wait_for_result(rospy.Duration(10.0)) # check this
 
