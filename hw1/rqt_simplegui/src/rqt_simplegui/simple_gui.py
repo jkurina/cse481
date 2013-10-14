@@ -15,6 +15,7 @@ from sound_play.msg import SoundRequest
 from sound_play.libsoundplay import SoundClient
 from gripper import Gripper
 from head import Head
+from base import Base
 
 class SimpleGUI(Plugin):
 
@@ -33,15 +34,15 @@ class SimpleGUI(Plugin):
         
         large_box = QtGui.QVBoxLayout()
         
-	#Sound textbox
-	sound_textbox = QtGui.QLineEdit("Squirtle Squirtle") #Default Text
-	sound_textbox.setFixedWidth(400)
-	#Set a handle on the textbox to retrieve the text when button clicked
-	self.sound_textbox = sound_textbox
+        #Sound textbox
+        sound_textbox = QtGui.QLineEdit("Squirtle Squirtle") #Default Text
+        sound_textbox.setFixedWidth(400)
+        #Set a handle on the textbox to retrieve the text when button clicked
+        self.sound_textbox = sound_textbox
 
         button_box = QtGui.QHBoxLayout()
         button_box.addWidget(self.create_button('Speak', self.command_cb))
-	button_box.addWidget(sound_textbox)
+    	button_box.addWidget(sound_textbox)
         button_box.addStretch(1)
         large_box.addLayout(button_box)
         large_box.addItem(QtGui.QSpacerItem(100,20))
@@ -65,7 +66,32 @@ class SimpleGUI(Plugin):
         left_head = Head(Head.LEFT)
         left_head_button = self.create_button('left head', left_head.create_closure())
         large_box.addWidget(left_head_button)
-       
+
+        #forward
+        forward_base = Base(Base.FORWARD)
+        forward_base_button = self.create_button('move forward', forward_base.create_closure())
+        large_box.addWidget(forward_base_button)
+        #backward
+        backward_base= Base(Base.BACKWARD)
+      	backward_base_button = self.create_button('move backward', backward_base.create_closure())
+        large_box.addWidget(backward_base_button)
+        #left
+        left_base= Base(Base.LEFT)
+      	left_base_button = self.create_button('move left', left_base.create_closure())
+        large_box.addWidget(left_base_button)
+        #right
+        right_base= Base(Base.RIGHT)
+      	right_base_button= self.create_button('move right', right_base.create_closure())
+        large_box.addWidget(right_base_button)
+        #turn left
+        turnleft_base= Base(Base.TURNLEFT)
+      	turnleft_base_button = self.create_button('turn left', turnleft_base.create_closure())
+        large_box.addWidget(turnleft_base_button)
+        #turn right
+        turnright_base= Base(Base.TURNRIGHT)
+      	turnright_base_button = self.create_button('turn right', turnright_base.create_closure())
+        large_box.addWidget(turnright_base_button)
+
         speech_box = QtGui.QHBoxLayout()
         self.speech_label = QtGui.QLabel('Robot has not spoken yet')
         palette = QtGui.QPalette()
