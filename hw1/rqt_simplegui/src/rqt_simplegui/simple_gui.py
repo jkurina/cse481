@@ -33,9 +33,15 @@ class SimpleGUI(Plugin):
         
         large_box = QtGui.QVBoxLayout()
         
+	#Sound textbox
+	sound_textbox = QtGui.QLineEdit("Squirtle Squirtle") #Default Text
+	sound_textbox.setFixedWidth(400)
+	#Set a handle on the textbox to retrieve the text when button clicked
+	self.sound_textbox = sound_textbox
+
         button_box = QtGui.QHBoxLayout()
-        button_box.addWidget(self.create_button('Say something',
-                self.command_cb))
+        button_box.addWidget(self.create_button('Speak', self.command_cb))
+	button_box.addWidget(sound_textbox)
         button_box.addStretch(1)
         large_box.addLayout(button_box)
         large_box.addItem(QtGui.QSpacerItem(100,20))
@@ -91,9 +97,9 @@ class SimpleGUI(Plugin):
 
     def command_cb(self):
         button_name = self._widget.sender().text()
-        if (button_name == 'Say something'):
-            qWarning('Robot will say: something')
-            self._sound_client.say('Soi soi soi!')
+        if (button_name == 'Speak'):
+            qWarning('Robot will say: ' + self.sound_textbox.text())
+            self._sound_client.say(self.sound_textbox.text())
             
     def shutdown_plugin(self):
         # TODO unregister all publishers here
