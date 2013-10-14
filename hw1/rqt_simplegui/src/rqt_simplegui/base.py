@@ -40,9 +40,15 @@ class Base():
             elif(self.direction == Base.BACKWARD):
                 twist_msg.linear = Vector3(-1.0, 0.0, 0.0)
                 twist_msg.angular = Vector3(0.0, 0.0, 0.0)
-            elif(self.direction == Base.CLOCKWISE):
+            elif(self.direction == Base.LEFT):
+                twist_msg.linear = Vector3(0.0, 1.0, 0.0)
+                twist_msg.angular = Vector3(0.0, 0.0, 0.0);
+            elif(self.direction == Base.RIGHT):
+                twist_msg.linear = Vector3(0.0, -1.0, 0.0)
+                twist_msg.angular = Vector3(0.0, 0.0, 0.0);
+            elif(self.direction == Base.COUNTER):
                 twist_msg.linear = Vector3(0.0, 0.0, 0.0)
-                twist_msg.angular = Vector3(0.0, 0.0, -1.0);
+                twist_msg.angular = Vector3(0.0, 0.0, 1.0);
             elif(self.direction == Base.COUNTER):
                 twist_msg.linear = Vector3(0.0, 0.0, 0.0)
                 twist_msg.angular = Vector3(0.0, 0.0, 1.0);
