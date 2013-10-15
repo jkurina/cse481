@@ -25,7 +25,7 @@ class SimpleGUI(Plugin):
         super(SimpleGUI, self).__init__(context)
         self.setObjectName('SimpleGUI')
         self._widget = QWidget()
-        
+        self._widget.setFixedSize(600, 600)
         self._sound_client = SoundClient()
         rospy.Subscriber('robotsound', SoundRequest, self.sound_cb)
 
@@ -36,11 +36,12 @@ class SimpleGUI(Plugin):
 
         #Sound textbox
         sound_textbox = QtGui.QLineEdit("Squirtle Squirtle") #Default Text
-        sound_textbox.setFixedWidth(400)
+        sound_textbox.setFixedWidth(450)
         #Set a handle on the textbox to retrieve the text when button clicked
         self.sound_textbox = sound_textbox
 
         button_box = QtGui.QHBoxLayout()
+        button_box.addItem(QtGui.QSpacerItem(15,20))
         button_box.addWidget(self.create_button('Speak', self.command_cb))
         button_box.addWidget(sound_textbox)
         button_box.addStretch(1)
@@ -100,10 +101,13 @@ class SimpleGUI(Plugin):
         gripper_box.addWidget(left_gripper)
         gripper_box.addItem(QtGui.QSpacerItem(500,20))
         gripper_box.addWidget(right_gripper)
+        gripper_box.addItem(QtGui.QSpacerItem(75,20))
         large_box.addLayout(gripper_box)
         large_box.addItem(QtGui.QSpacerItem(100,200))
 
         base_box = QtGui.QVBoxLayout()
+
+	large_box.addItem(QtGui.QSpacerItem(100,100))
 
         #forward
         forward_base_box = QtGui.QHBoxLayout()
@@ -165,7 +169,9 @@ class SimpleGUI(Plugin):
         self._widget.setObjectName('SimpleGUI')
         self._widget.setLayout(large_box)
         context.add_widget(self._widget)
-  
+        self._widget.setStyleSheet("QWidget { image: url(%s) }" % "/home/vjampala/catkin_ws/src/cse481/hw1/rqt_simplegui/rosie_background.jpg")
+
+
     def sound_cb(self, sound_request):
         qWarning('Received sound.')
         self.sound_sig.emit(sound_request)
