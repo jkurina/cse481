@@ -16,6 +16,7 @@ from sound_play.libsoundplay import SoundClient
 from gripper import Gripper
 from head import Head
 from base import Base
+import os
 
 class SimpleGUI(Plugin):
 
@@ -34,10 +35,11 @@ class SimpleGUI(Plugin):
         
         large_box = QtGui.QVBoxLayout()
 
-        #Sound textbox
-        sound_textbox = QtGui.QLineEdit("Squirtle Squirtle") #Default Text
+        # Textbox to enter words for PR2 to say 
+        sound_textbox = QtGui.QLineEdit("Squirtle Squirtle")  # Default Text
         sound_textbox.setFixedWidth(450)
-        #Set a handle on the textbox to retrieve the text when button clicked
+        
+	# Set a handler on the textbox to retrieve the text when button clicked
         self.sound_textbox = sound_textbox
 
         button_box = QtGui.QHBoxLayout()
@@ -59,18 +61,16 @@ class SimpleGUI(Plugin):
 
         large_box.addItem(QtGui.QSpacerItem(100,20))
 
-        up_head = Head(Head.UP)
+        # Buttons to move the PR2's head
+	up_head = Head(Head.UP)
         head_box = QtGui.QVBoxLayout()
         up_head_box = QtGui.QHBoxLayout()
         up_head_button = self.create_button('^', up_head.create_closure())
-        #large_box.addWidget(up_head_button)
         down_head = Head(Head.DOWN)
         down_head_box = QtGui.QHBoxLayout()
         down_head_button = self.create_button('v', down_head.create_closure())
-        #large_box.addWidget(down_head_button)
         right_head = Head(Head.RIGHT)
         right_head_button = self.create_button('>', right_head.create_closure())
-        #large_box.addWidget(right_head_button)
         left_head = Head(Head.LEFT)
         left_head_button = self.create_button('<', left_head.create_closure())
         left_right_head_box = QtGui.QHBoxLayout()
@@ -90,13 +90,14 @@ class SimpleGUI(Plugin):
         head_box.addLayout(left_right_head_box)
         head_box.addLayout(down_head_box)
         large_box.addLayout(head_box)
-        #large_box.addItem(QtGui.QSpacerItem(500,20))
-        #large_box.addWidget(left_head_button)
 
+	# Buttons to move the grippers
         gripper = Gripper(Gripper.RIGHT, Gripper.OPEN)
-        right_gripper = self.create_button('Right gripper!', gripper.create_closure())
+        right_gripper = self.create_button('Right gripper',
+		gripper.create_closure())
         gripper = Gripper(Gripper.LEFT, Gripper.OPEN)
-        left_gripper = self.create_button('Left gripper!', gripper.create_closure()) 
+        left_gripper = self.create_button('Left gripper',
+		gripper.create_closure()) 
         gripper_box = QtGui.QHBoxLayout()
         gripper_box.addWidget(left_gripper)
         gripper_box.addItem(QtGui.QSpacerItem(500,20))
@@ -105,11 +106,9 @@ class SimpleGUI(Plugin):
         large_box.addLayout(gripper_box)
         large_box.addItem(QtGui.QSpacerItem(100,200))
 
-        base_box = QtGui.QVBoxLayout()
-
+        # Buttons to move the base
+	base_box = QtGui.QVBoxLayout()
 	large_box.addItem(QtGui.QSpacerItem(100,100))
-
-        #forward
         forward_base_box = QtGui.QHBoxLayout()
         forward_base = Base(Base.FORWARD)
         forward_base_button = self.create_button('move forward', forward_base.create_closure())
@@ -117,59 +116,55 @@ class SimpleGUI(Plugin):
         forward_base_box.addWidget(forward_base_button)
         forward_base_box.addItem(QtGui.QSpacerItem(400,20))
         base_box.addLayout(forward_base_box)
-        #large_box.addWidget(forward_base_button)
 
-        #left
         left_right_base_box = QtGui.QHBoxLayout()
         left_base= Base(Base.LEFT)
-        left_base_button = self.create_button('move left', left_base.create_closure())
-        #large_box.addWidget(left_base_button)
+        left_base_button = self.create_button('move left',
+		left_base.create_closure())
 
-        #right
         right_base= Base(Base.RIGHT)
-        right_base_button= self.create_button('move right', right_base.create_closure())
+        right_base_button= self.create_button('move right',
+		right_base.create_closure())
         left_right_base_box.addItem(QtGui.QSpacerItem(300,20))
         left_right_base_box.addWidget(left_base_button)
         left_right_base_box.addItem(QtGui.QSpacerItem(50,20))
         left_right_base_box.addWidget(right_base_button)
         left_right_base_box.addItem(QtGui.QSpacerItem(300,20))
         base_box.addLayout(left_right_base_box)
-        #large_box.addWidget(right_base_button)
 
-        #backward
         backward_base_box = QtGui.QHBoxLayout()
         backward_base= Base(Base.BACKWARD)
-        backward_base_button = self.create_button('move backward', backward_base.create_closure())
+        backward_base_button = self.create_button('move backward',
+		backward_base.create_closure())
         backward_base_box.addItem(QtGui.QSpacerItem(400,20))
         backward_base_box.addWidget(backward_base_button)
         backward_base_box.addItem(QtGui.QSpacerItem(400,20))
         base_box.addLayout(backward_base_box)
-        #large_box.addWidget(backward_base_button)
 
         large_box.addLayout(base_box)
         
         turn_base_box = QtGui.QHBoxLayout()
 
-        #turn counter-clockwise
         counter_base= Base(Base.COUNTER)
-        counter_base_button = self.create_button('\\\n        -->', counter_base.create_closure())
-        #large_box.addWidget(counter_base_button)
+        counter_base_button = self.create_button('\\\n        -->',
+		counter_base.create_closure())
         
-        #turn clockwise
         clockwise_base= Base(Base.CLOCKWISE)
-        clockwise_base_button = self.create_button('        /\n<--', clockwise_base.create_closure())
+        clockwise_base_button = self.create_button('        /\n<--',
+		clockwise_base.create_closure())
         turn_base_box.addItem(QtGui.QSpacerItem(300,20))
         turn_base_box.addWidget(counter_base_button)
         turn_base_box.addItem(QtGui.QSpacerItem(100,20))
         turn_base_box.addWidget(clockwise_base_button)
         turn_base_box.addItem(QtGui.QSpacerItem(300,20))
         large_box.addLayout(turn_base_box)
-        #large_box.addWidget(clockwise_base_button)
 
         self._widget.setObjectName('SimpleGUI')
         self._widget.setLayout(large_box)
         context.add_widget(self._widget)
-        self._widget.setStyleSheet("QWidget { image: url(%s) }" % "/home/team2/catkin_ws/src/cse481/hw1/rqt_simplegui/rosie_background.jpg")
+        self._widget.setStyleSheet("QWidget { image: url(%s) }" %
+		(str(os.path.dirname(os.path.realpath(__file__))) +
+		"/../../rosie_background.jpg"))
 
     def sound_cb(self, sound_request):
         qWarning('Received sound.')
