@@ -173,6 +173,7 @@ class SimpleGUI(Plugin):
     def create_button(self, name, method):
         btn = QtGui.QPushButton(name, self._widget)
         btn.clicked.connect(method)
+        btn.setAutoRepeat(True)
         return btn
 
     def sound_sig_cb(self, sound_request):

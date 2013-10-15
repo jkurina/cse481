@@ -35,28 +35,25 @@ class Base():
 
             twist_msg = Twist()
             if(self.direction == Base.FORWARD):
-                twist_msg.linear = Vector3(1.0, 0.0, 0.0)
+                twist_msg.linear = Vector3(0.5, 0.0, 0.0)
                 twist_msg.angular = Vector3(0.0, 0.0, 0.0)
             elif(self.direction == Base.BACKWARD):
-                twist_msg.linear = Vector3(-1.0, 0.0, 0.0)
+                twist_msg.linear = Vector3(-0.5, 0.0, 0.0)
                 twist_msg.angular = Vector3(0.0, 0.0, 0.0)
             elif(self.direction == Base.LEFT):
-                twist_msg.linear = Vector3(0.0, 1.0, 0.0)
+                twist_msg.linear = Vector3(0.0, 0.5, 0.0)
                 twist_msg.angular = Vector3(0.0, 0.0, 0.0);
             elif(self.direction == Base.RIGHT):
-                twist_msg.linear = Vector3(0.0, -1.0, 0.0)
+                twist_msg.linear = Vector3(0.0, -0.5, 0.0)
                 twist_msg.angular = Vector3(0.0, 0.0, 0.0);
             elif(self.direction == Base.COUNTER):
                 twist_msg.linear = Vector3(0.0, 0.0, 0.0)
-                twist_msg.angular = Vector3(0.0, 0.0, 1.0);
+                twist_msg.angular = Vector3(0.0, 0.0, 0.5);
             elif(self.direction == Base.CLOCKWISE):
                 twist_msg.linear = Vector3(0.0, 0.0, 0.0)
-                twist_msg.angular = Vector3(0.0, 0.0, -1.0);
+                twist_msg.angular = Vector3(0.0, 0.0, -0.5);
 
-            
-            for i in range(10):
-                base_publisher.publish(twist_msg)
-                time.sleep(0.1)
+            base_publisher.publish(twist_msg)
 
 
         return move_base
