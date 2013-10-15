@@ -169,8 +169,7 @@ class SimpleGUI(Plugin):
         self._widget.setObjectName('SimpleGUI')
         self._widget.setLayout(large_box)
         context.add_widget(self._widget)
-        self._widget.setStyleSheet("QWidget { image: url(%s) }" % "/home/vjampala/catkin_ws/src/cse481/hw1/rqt_simplegui/rosie_background.jpg")
-
+        self._widget.setStyleSheet("QWidget { image: url(%s) }" % "/home/team2/catkin_ws/src/cse481/hw1/rqt_simplegui/rosie_background.jpg")
 
     def sound_cb(self, sound_request):
         qWarning('Received sound.')
