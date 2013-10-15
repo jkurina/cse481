@@ -50,6 +50,7 @@ class SimpleGUI(Plugin):
         large_box.addLayout(button_box)
 
         speech_box = QtGui.QHBoxLayout()
+	speech_box.addItem(QtGui.QSpacerItem(15, 20))
         self.speech_label = QtGui.QLabel('Robot has not spoken yet')
         palette = QtGui.QPalette()
         palette.setColor(QtGui.QPalette.Foreground,QtCore.Qt.blue)
@@ -59,7 +60,7 @@ class SimpleGUI(Plugin):
         large_box.addLayout(speech_box)
         large_box.addStretch(1)
 
-        large_box.addItem(QtGui.QSpacerItem(100,20))
+        #large_box.addItem(QtGui.QSpacerItem(50,20))
 
         # Buttons to move the PR2's head
 	up_head = Head(Head.UP)
@@ -75,17 +76,17 @@ class SimpleGUI(Plugin):
         left_head_button = self.create_button('<', left_head.create_closure())
         left_right_head_box = QtGui.QHBoxLayout()
 
-        up_head_box.addItem(QtGui.QSpacerItem(400,20))
+        up_head_box.addItem(QtGui.QSpacerItem(235,20))
         up_head_box.addWidget(up_head_button)
-        up_head_box.addItem(QtGui.QSpacerItem(400,20))
-        left_right_head_box.addItem(QtGui.QSpacerItem(300,20))
+        up_head_box.addItem(QtGui.QSpacerItem(275,20))
+        left_right_head_box.addItem(QtGui.QSpacerItem(160,20))
         left_right_head_box.addWidget(left_head_button)
-        left_right_head_box.addItem(QtGui.QSpacerItem(50,20))
+        left_right_head_box.addItem(QtGui.QSpacerItem(60,20))
         left_right_head_box.addWidget(right_head_button)
-        left_right_head_box.addItem(QtGui.QSpacerItem(300,20))
-        down_head_box.addItem(QtGui.QSpacerItem(400,20))
+        left_right_head_box.addItem(QtGui.QSpacerItem(225,20))
+        down_head_box.addItem(QtGui.QSpacerItem(235,20))
         down_head_box.addWidget(down_head_button)
-        down_head_box.addItem(QtGui.QSpacerItem(400,20))
+        down_head_box.addItem(QtGui.QSpacerItem(275,20))
         head_box.addLayout(up_head_box)
         head_box.addLayout(left_right_head_box)
         head_box.addLayout(down_head_box)
@@ -98,13 +99,14 @@ class SimpleGUI(Plugin):
         gripper = Gripper(Gripper.LEFT, Gripper.OPEN)
         left_gripper = self.create_button('Left gripper',
 		gripper.create_closure()) 
+	large_box.addItem(QtGui.QSpacerItem(100,250))
         gripper_box = QtGui.QHBoxLayout()
+	gripper_box.addItem(QtGui.QSpacerItem(75,20))
         gripper_box.addWidget(left_gripper)
-        gripper_box.addItem(QtGui.QSpacerItem(500,20))
+        gripper_box.addItem(QtGui.QSpacerItem(450,20))
         gripper_box.addWidget(right_gripper)
         gripper_box.addItem(QtGui.QSpacerItem(75,20))
         large_box.addLayout(gripper_box)
-        large_box.addItem(QtGui.QSpacerItem(100,200))
 
         # Buttons to move the base
 	base_box = QtGui.QVBoxLayout()
@@ -152,11 +154,11 @@ class SimpleGUI(Plugin):
         clockwise_base= Base(Base.CLOCKWISE)
         clockwise_base_button = self.create_button('        /\n<--',
 		clockwise_base.create_closure())
-        turn_base_box.addItem(QtGui.QSpacerItem(300,20))
+        turn_base_box.addItem(QtGui.QSpacerItem(75,20))
         turn_base_box.addWidget(counter_base_button)
-        turn_base_box.addItem(QtGui.QSpacerItem(100,20))
+        turn_base_box.addItem(QtGui.QSpacerItem(225,20))
         turn_base_box.addWidget(clockwise_base_button)
-        turn_base_box.addItem(QtGui.QSpacerItem(300,20))
+        turn_base_box.addItem(QtGui.QSpacerItem(100,20))
         large_box.addLayout(turn_base_box)
 
         self._widget.setObjectName('SimpleGUI')
