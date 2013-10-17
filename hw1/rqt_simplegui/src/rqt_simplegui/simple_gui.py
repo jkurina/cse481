@@ -3,7 +3,10 @@
 import roslib
 roslib.load_manifest('sound_play')
 roslib.load_manifest('rospy')
-
+roslib.load_manifest('visualization_msgs')
+from visualization_msgs.msg import Marker
+from geometry_msgs.msg import Quaternion, Pose, Point, Vector3
+from std_msgs.msg import Header, ColorRGBA
 from subprocess import call
 import rospy
 from qt_gui.plugin import Plugin
@@ -38,8 +41,9 @@ class SimpleGUI(Plugin):
         # Textbox to enter words for PR2 to say 
         sound_textbox = QtGui.QLineEdit("Squirtle Squirtle")  # Default Text
         sound_textbox.setFixedWidth(450)
+        self.marker_publisher = rospy.Publisher('visualization_marker', Marker)
         
-	# Set a handler on the textbox to retrieve the text when button clicked
+        # Set a handler on the textbox to retrieve the text when button clicked
         self.sound_textbox = sound_textbox
 
         button_box = QtGui.QHBoxLayout()
@@ -50,7 +54,7 @@ class SimpleGUI(Plugin):
         large_box.addLayout(button_box)
 
         speech_box = QtGui.QHBoxLayout()
-	speech_box.addItem(QtGui.QSpacerItem(15, 20))
+        speech_box.addItem(QtGui.QSpacerItem(15, 20))
         self.speech_label = QtGui.QLabel('Robot has not spoken yet')
         palette = QtGui.QPalette()
         palette.setColor(QtGui.QPalette.Foreground,QtCore.Qt.blue)
@@ -63,16 +67,16 @@ class SimpleGUI(Plugin):
         #large_box.addItem(QtGui.QSpacerItem(50,20))
 
         # Buttons to move the PR2's head
-	up_head = Head(Head.UP)
+        up_head = Head(Head.UP, self)
         head_box = QtGui.QVBoxLayout()
         up_head_box = QtGui.QHBoxLayout()
         up_head_button = self.create_button('^', up_head.create_closure())
-        down_head = Head(Head.DOWN)
+        down_head = Head(Head.DOWN, self)
         down_head_box = QtGui.QHBoxLayout()
         down_head_button = self.create_button('v', down_head.create_closure())
-        right_head = Head(Head.RIGHT)
+        right_head = Head(Head.RIGHT, self)
         right_head_button = self.create_button('>', right_head.create_closure())
-        left_head = Head(Head.LEFT)
+        left_head = Head(Head.LEFT, self)
         left_head_button = self.create_button('<', left_head.create_closure())
         left_right_head_box = QtGui.QHBoxLayout()
 
@@ -92,16 +96,15 @@ class SimpleGUI(Plugin):
         head_box.addLayout(down_head_box)
         large_box.addLayout(head_box)
 
-	# Buttons to move the grippers
-        gripper = Gripper(Gripper.RIGHT, Gripper.OPEN)
+        # Buttons to move the grippers
+        gripper = Gripper(Gripper.RIGHT, Gripper.OPEN, self)
         right_gripper = self.create_button('Right gripper',
-		gripper.create_closure())
-        gripper = Gripper(Gripper.LEFT, Gripper.OPEN)
-        left_gripper = self.create_button('Left gripper',
-		gripper.create_closure()) 
-	large_box.addItem(QtGui.QSpacerItem(100,250))
+                gripper.create_closure())
+        gripper = Gripper(Gripper.LEFT, Gripper.OPEN, self)
+        left_gripper = self.create_button('Left gripper', gripper.create_closure()) 
+        large_box.addItem(QtGui.QSpacerItem(100,250))
         gripper_box = QtGui.QHBoxLayout()
-	gripper_box.addItem(QtGui.QSpacerItem(75,20))
+        gripper_box.addItem(QtGui.QSpacerItem(75,20))
         gripper_box.addWidget(left_gripper)
         gripper_box.addItem(QtGui.QSpacerItem(450,20))
         gripper_box.addWidget(right_gripper)
@@ -109,10 +112,10 @@ class SimpleGUI(Plugin):
         large_box.addLayout(gripper_box)
 
         # Buttons to move the base
-	base_box = QtGui.QVBoxLayout()
-	large_box.addItem(QtGui.QSpacerItem(100,100))
+        base_box = QtGui.QVBoxLayout()
+        large_box.addItem(QtGui.QSpacerItem(100,100))
         forward_base_box = QtGui.QHBoxLayout()
-        forward_base = Base(Base.FORWARD)
+        forward_base = Base(Base.FORWARD, self)
         forward_base_button = self.create_button('move forward', forward_base.create_closure())
         forward_base_box.addItem(QtGui.QSpacerItem(400,20))
         forward_base_box.addWidget(forward_base_button)
@@ -120,13 +123,13 @@ class SimpleGUI(Plugin):
         base_box.addLayout(forward_base_box)
 
         left_right_base_box = QtGui.QHBoxLayout()
-        left_base= Base(Base.LEFT)
+        left_base= Base(Base.LEFT, self)
         left_base_button = self.create_button('move left',
-		left_base.create_closure())
+                left_base.create_closure())
 
-        right_base= Base(Base.RIGHT)
+        right_base= Base(Base.RIGHT, self)
         right_base_button= self.create_button('move right',
-		right_base.create_closure())
+                right_base.create_closure())
         left_right_base_box.addItem(QtGui.QSpacerItem(300,20))
         left_right_base_box.addWidget(left_base_button)
         left_right_base_box.addItem(QtGui.QSpacerItem(50,20))
@@ -135,9 +138,9 @@ class SimpleGUI(Plugin):
         base_box.addLayout(left_right_base_box)
 
         backward_base_box = QtGui.QHBoxLayout()
-        backward_base= Base(Base.BACKWARD)
+        backward_base= Base(Base.BACKWARD, self)
         backward_base_button = self.create_button('move backward',
-		backward_base.create_closure())
+                backward_base.create_closure())
         backward_base_box.addItem(QtGui.QSpacerItem(400,20))
         backward_base_box.addWidget(backward_base_button)
         backward_base_box.addItem(QtGui.QSpacerItem(400,20))
@@ -147,13 +150,13 @@ class SimpleGUI(Plugin):
         
         turn_base_box = QtGui.QHBoxLayout()
 
-        counter_base= Base(Base.COUNTER)
+        counter_base= Base(Base.COUNTER, self)
         counter_base_button = self.create_button('\\\n        -->',
-		counter_base.create_closure())
+                counter_base.create_closure())
         
-        clockwise_base= Base(Base.CLOCKWISE)
+        clockwise_base= Base(Base.CLOCKWISE, self)
         clockwise_base_button = self.create_button('        /\n<--',
-		clockwise_base.create_closure())
+                clockwise_base.create_closure())
         turn_base_box.addItem(QtGui.QSpacerItem(75,20))
         turn_base_box.addWidget(counter_base_button)
         turn_base_box.addItem(QtGui.QSpacerItem(225,20))
@@ -165,9 +168,20 @@ class SimpleGUI(Plugin):
         self._widget.setLayout(large_box)
         context.add_widget(self._widget)
         self._widget.setStyleSheet("QWidget { image: url(%s) }" %
-		(str(os.path.dirname(os.path.realpath(__file__))) +
-		"/../../rosie_background.jpg"))
+                (str(os.path.dirname(os.path.realpath(__file__))) +
+                "/../../rosie_background.jpg"))
 
+    def show_text_in_rviz(self, text):
+        marker = Marker(type=Marker.TEXT_VIEW_FACING, id=0,
+                lifetime=rospy.Duration(1.5),
+                pose=Pose(Point(0.5, 0.5, 1.45), Quaternion(0, 0, 0, 1)),
+                scale=Vector3(0.06, 0.06, 0.06),
+                header=Header(frame_id='base_link'),
+                color=ColorRGBA(0.0, 1.0, 0.0, 0.8), text=text)
+        self.marker_publisher.publish(marker)
+   
+
+ 
     def sound_cb(self, sound_request):
         qWarning('Received sound.')
         self.sound_sig.emit(sound_request)

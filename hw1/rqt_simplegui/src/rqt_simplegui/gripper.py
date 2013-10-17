@@ -10,6 +10,7 @@ from control_msgs.msg import GripperCommandAction
 from control_msgs.msg import GripperCommandGoal
 from actionlib import SimpleActionClient
 from actionlib_msgs.msg import GoalStatus
+import simple_gui
 
 class Gripper():
     
@@ -18,25 +19,26 @@ class Gripper():
     OPEN = 1
     CLOSED = 0
 
-    def __init__(self, direction, state):
+    def __init__(self, direction, state, gui):
         assert(direction == Gripper.LEFT or direction == Gripper.RIGHT)
         assert(state == Gripper.OPEN or state == Gripper.CLOSED)
         self.direction = direction
         self.state = state
+        self.gui = gui
          
     
     def create_closure(self):
         
         def move_gripper():
             name_space = '/{0}_gripper_controller/gripper_action'.format(
-			self.direction)
+            self.direction)
             gripper_client = SimpleActionClient(name_space,
-			GripperCommandAction)
+            GripperCommandAction)
             gripper_client.wait_for_server()
 
             gripper_goal = GripperCommandGoal()
             
-	    if self.state:
+            if self.state:
                 # The gripper is open. Close it and update its state.
                 gripper_goal.command.position = 0.0
                 self.state = Gripper.CLOSED
@@ -49,8 +51,9 @@ class Gripper():
 
             gripper_client.send_goal(gripper_goal)
             gripper_client.wait_for_result(rospy.Duration(10.0))
-               
-	return move_gripper
+            self.gui.show_text_in_rviz("Gripper")
+
+        return move_gripper
 
  
 

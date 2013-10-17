@@ -10,6 +10,7 @@ from control_msgs.msg import PointHeadGoal
 from actionlib import SimpleActionClient
 from actionlib_msgs.msg import GoalStatus
 from geometry_msgs.msg import Point
+import simple_gui
 
 class Head():
     LEFT = 'l'
@@ -17,10 +18,11 @@ class Head():
     UP = 'u'
     DOWN = 'd'
 
-    def __init__(self, direction):
+    def __init__(self, direction, gui):
         assert(direction == Head.LEFT or direction == Head.RIGHT
             or direction == Head.UP or direction == Head.DOWN)
         self.direction = direction
+        self.gui = gui
 
     def get_frame(self):
         return 'head_tilt_link'
@@ -54,5 +56,7 @@ class Head():
 
             if (head_client.get_state() != GoalStatus.SUCCEEDED):
                 rospy.logwarn('Head action unsuccessful.')
+            
+            self.gui.show_text_in_rviz("Head!")
         return move_head
 
