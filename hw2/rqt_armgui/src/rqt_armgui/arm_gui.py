@@ -23,6 +23,9 @@ from pr2_mechanism_msgs.srv import SwitchController
 from sensor_msgs.msg import JointState
 from actionlib import SimpleActionClient
 
+from pose_saver import PoseSaver
+from pose_loader import PoseLoader
+
 class ArmGUI(Plugin):
 
     joint_sig = Signal(JointState)
@@ -108,15 +111,29 @@ class ArmGUI(Plugin):
         state_box.addStretch(1)
         large_box.addLayout(state_box)
 
+        left_pose_saver = PoseSaver(PoseSaver.LEFT, self)
+        right_pose_saver = PoseSaver(PoseSaver.RIGHT, self)
+        large_box.addWidget(self.create_button("Create left arm pose",
+              left_pose_saver.create_closure()))
+        large_box.addWidget(self.create_button("Create right arm pose",
+              right_pose_saver.create_closure()))
+
+        left_pose_loader = PoseLoader(PoseLoader.LEFT, self)
+        right_pose_loader = PoseLoader(PoseLoader.RIGHT, self)
+        large_box.addWidget(left_pose_loader.create_button())
+        large_box.addWidget(right_pose_loader.create_button())
+
         large_box.addStretch(1)
         self._widget.setObjectName('ArmGUI')
         self._widget.setLayout(large_box)
         context.add_widget(self._widget)
         rospy.loginfo('GUI initialization complete.')
         
-    def create_button(self, name):
+    def create_button(self, name, method=None):
+        if method == None:
+          method = self.command_cb
         btn = QtGui.QPushButton(name, self._widget)
-        btn.clicked.connect(self.command_cb)
+        btn.clicked.connect(method)
         return btn
 
     def command_cb(self):
