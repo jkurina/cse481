@@ -25,6 +25,7 @@ from actionlib import SimpleActionClient
 
 from pose_saver import PoseSaver
 from pose_loader import PoseLoader
+from arm_db import ArmDB
 
 class ArmGUI(Plugin):
 
@@ -34,6 +35,7 @@ class ArmGUI(Plugin):
         super(ArmGUI, self).__init__(context)
         self.setObjectName('ArmGUI')
         self._widget = QWidget()
+        self.arm_db = ArmDB()
         
         # Action/service/message clients or servers
         
@@ -120,8 +122,13 @@ class ArmGUI(Plugin):
 
         left_pose_loader = PoseLoader(PoseLoader.LEFT, self)
         right_pose_loader = PoseLoader(PoseLoader.RIGHT, self)
-        large_box.addWidget(left_pose_loader.create_button())
-        large_box.addWidget(right_pose_loader.create_button())
+        self.combo_box_left = left_pose_loader.create_button()
+        self.combo_box_right = right_pose_loader.create_button()
+        large_box.addWidget(self.combo_box_left)
+        large_box.addWidget(self.combo_box_right)
+
+        button_box2.addWidget(self.create_button('Delete pose: left'))
+        button_box2.addWidget(self.create_button('Delete pose: right'))
 
         large_box.addStretch(1)
         self._widget.setObjectName('ArmGUI')
@@ -154,6 +161,20 @@ class ArmGUI(Plugin):
             self.move_arm('r')
         elif (button_name == 'Move left arm to saved pose'):
             self.move_arm('l')
+        elif (button_name == 'Delete pose: left'):
+            self.delete_pose_left()
+        elif (button_name == 'Delete pose: right'):
+            self.delete_pose_right()
+
+    def delete_pose_left(self):
+        selected_index = self.combo_box_left.currentIndex()
+        self.arm_db.rmPos('l', self.combo_box_left.itemText(selected_index))
+        self.combo_box_left.removeItem(selected_index)
+        
+    def delete_pose_right(self):
+        selected_index = self.combo_box_right.currentIndex()
+        self.arm_db.rmPos('r', self.combo_box_right.itemText(selected_index))
+        self.combo_box_right.removeItem(selected_index)
 
     def save_pose(self, side_prefix):
         if (side_prefix == 'r'):

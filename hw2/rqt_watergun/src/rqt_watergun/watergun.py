@@ -19,15 +19,16 @@ from sound_play.libsoundplay import SoundClient
 from gripper import Gripper
 from head import Head
 from base import Base
+from arms import Arm
 import os
 
-class SimpleGUI(Plugin):
+class WaterGun(Plugin):
 
     sound_sig = Signal(SoundRequest)
 
     def __init__(self, context):
-        super(SimpleGUI, self).__init__(context)
-        self.setObjectName('SimpleGUI')
+        super(WaterGun, self).__init__(context)
+        self.setObjectName('WaterGun')
         self._widget = QWidget()
         self._widget.setFixedSize(600, 600)
         self._sound_client = SoundClient()
@@ -96,9 +97,18 @@ class SimpleGUI(Plugin):
         head_box.addLayout(down_head_box)
         large_box.addLayout(head_box)
 
+
+        # Buttons to launch the arm-pose UI
+        arm = Arm(Arm.RIGHT, self)
+        right_arm = self.create_button('Right arm', arm.create_closure())
+        large_box.addWidget(right_arm)
+        arm = Arm(Arm.LEFT, self)
+        left_arm = self.create_button('Left arm', arm.create_closure())
+        large_box.addWidget(left_arm)
+
         # Buttons to move the grippers
         gripper = Gripper(Gripper.RIGHT, Gripper.OPEN, self)
-        right_gripper = self.create_button('Right gripper',
+        right_gripper = self.create_button('Right proboscis',
                 gripper.create_closure())
         gripper = Gripper(Gripper.LEFT, Gripper.OPEN, self)
         left_gripper = self.create_button('Left gripper', gripper.create_closure()) 
@@ -164,7 +174,7 @@ class SimpleGUI(Plugin):
         turn_base_box.addItem(QtGui.QSpacerItem(100,20))
         large_box.addLayout(turn_base_box)
 
-        self._widget.setObjectName('SimpleGUI')
+        self._widget.setObjectName('WaterGun')
         self._widget.setLayout(large_box)
         context.add_widget(self._widget)
         self._widget.setStyleSheet("QWidget { image: url(%s) }" %

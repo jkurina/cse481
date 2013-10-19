@@ -1,5 +1,5 @@
 <library path="src">
-  <class name="Simple GUI Plugin" type="rqt_simplegui.simple_gui.SimpleGUI" base_class_type="rqt_gui_py::Plugin">
+  <class name="Squirtle Watergun Plugin" type="rqt_watergun.watergun.WaterGun" base_class_type="rqt_gui_py::Plugin">
     <description>
       An example Python GUI plugin to create a great user interface.
     </description>

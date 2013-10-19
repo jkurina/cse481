@@ -26,3 +26,8 @@ import json
 from arm_db import ArmDB
 
 a = ArmDB()
+print a.getAllLeftPos()
+print a.getAllRightPos()
+a.savePos('l', 'my pose', [1,2,3])
+b = ArmDB()
+print b.getAllLeftPos()

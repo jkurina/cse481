@@ -10,7 +10,7 @@ from control_msgs.msg import PointHeadGoal
 from actionlib import SimpleActionClient
 from actionlib_msgs.msg import GoalStatus
 from geometry_msgs.msg import Point
-import simple_gui
+import watergun
 
 class Head():
     LEFT = 'l'

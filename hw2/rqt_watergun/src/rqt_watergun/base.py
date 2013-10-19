@@ -7,7 +7,7 @@ import rospy
 from geometry_msgs.msg import Twist
 from geometry_msgs.msg import Vector3
 import time
-import simple_gui
+import watergun
 
 class Base():
 

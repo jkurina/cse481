@@ -22,12 +22,13 @@ from control_msgs.msg import JointTrajectoryAction
 from pr2_mechanism_msgs.srv import SwitchController
 from sensor_msgs.msg import JointState
 from actionlib import SimpleActionClient
+from arm_db import ArmDB
 
-class PoseSaverDialog(QtGui.QDialog):
+class PoseLoaderDialog(QtGui.QDialog):
     def __init__(self, parent=None):
         # TODO: init
         QtGui.QDialog.__init__(self, parent)
-        self.setObjectName('PoseSaver')
+        self.setObjectName('PoseLoader')
 
         large_box = QtGui.QVBoxLayout()
         # add things here
@@ -66,12 +67,12 @@ class PoseSaverDialog(QtGui.QDialog):
 class PoseLoader():
     LEFT = 'l'
     RIGHT = 'r'
-
+    
     def __init__(self, side, gui):
         assert(side == PoseLoader.LEFT or side == PoseLoader.RIGHT)
         self.side = side
         self.gui = gui
-        self.data = ['foo', 'bar', 'baz']
+        self.arm_db = ArmDB()
 
     def label(self):
         if self.side == PoseLoader.LEFT:
@@ -83,10 +84,14 @@ class PoseLoader():
         qWarning('Selected pose ' + index)
 
     def create_button(self):
+        # self.data is a dictionary name-->array[positions]
+        if self.side == PoseLoader.LEFT:
+            self.data = self.arm_db.getAllLeftPos()
+        else: # self.side == PoseLoader.RIGHT:
+            self.data = self.arm_db.getAllRightPos()
+        
         combo_box = QComboBox()
-        for item in self.data:
-            combo_box.addItem(item, "userdata")
+        for key in self.data.keys():
+            combo_box.addItem(key, self.data.get(key))
         combo_box.activated.connect(self.load_pose)
         return combo_box
-
-

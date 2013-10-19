@@ -10,7 +10,7 @@ from control_msgs.msg import GripperCommandAction
 from control_msgs.msg import GripperCommandGoal
 from actionlib import SimpleActionClient
 from actionlib_msgs.msg import GoalStatus
-import simple_gui
+import watergun
 
 class Gripper():
     
