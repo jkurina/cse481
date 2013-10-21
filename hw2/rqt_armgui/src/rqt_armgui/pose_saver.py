@@ -38,7 +38,7 @@ class PoseSaverDialog(QtGui.QDialog):
         # add things here
 
         # Textbox to enter words for PR2 to say 
-        default_text = "New pose 1"  # TODO: increment the number!
+        default_text = self.get_default_name()
         name_textbox = QtGui.QLineEdit(default_text)
         name_textbox.setFixedWidth(450)
         
@@ -81,6 +81,21 @@ class PoseSaverDialog(QtGui.QDialog):
         else: # self.side == PoseSaver.RIGHT:
             self.gui.combo_box_right.addItem(name, pose)
         self.accept()
+
+    def get_default_name(self):
+        poses = None
+        if self.side == PoseSaver.LEFT:
+            poses = self.gui.arm_db.getAllLeftPos()
+        else: # self.side == PoseSaver.RIGHT:
+            poses = self.gui.arm_db.getAllRightPos()
+        containsName = True
+        name = None
+        index = 0
+        while (containsName):
+           index = index + 1 
+           name = "New pose %d"%index
+           containsName = name in poses
+        return name 
 
 class PoseSaver():
     LEFT = 'l'
