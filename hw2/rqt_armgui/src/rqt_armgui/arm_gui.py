@@ -26,6 +26,7 @@ from actionlib import SimpleActionClient
 from pose_saver import PoseSaver
 from pose_loader import PoseLoader
 from arm_db import ArmDB
+import os
 
 class ArmGUI(Plugin):
 
@@ -35,6 +36,7 @@ class ArmGUI(Plugin):
         super(ArmGUI, self).__init__(context)
         self.setObjectName('ArmGUI')
         self._widget = QWidget()
+	self._widget.setFixedSize(525, 300)
         self.arm_db = ArmDB()
         
         # Action/service/message clients or servers
@@ -86,56 +88,72 @@ class ArmGUI(Plugin):
         
         large_box = QtGui.QVBoxLayout()
         
-        button_box1 = QtGui.QHBoxLayout()
-        button_box1.addWidget(self.create_button('Relax right arm'))
-        button_box1.addWidget(self.create_button('Freeze right arm'))
-        button_box1.addWidget(self.create_button('Relax left arm'))
-        button_box1.addWidget(self.create_button('Freeze left arm'))
-        button_box1.addStretch(1)
-        large_box.addLayout(button_box1)
-        large_box.addItem(QtGui.QSpacerItem(100,20))
+	arm_box = QtGui.QHBoxLayout()
+        right_arm_box = QtGui.QVBoxLayout()
+	left_arm_box = QtGui.QVBoxLayout()
 
-        button_box2 = QtGui.QHBoxLayout()
-        button_box2.addWidget(self.create_button('Move right arm to saved pose'))
-        button_box2.addWidget(self.create_button('Move left arm to saved pose'))
-        button_box2.addStretch(1)
-        large_box.addLayout(button_box2)
-        large_box.addItem(QtGui.QSpacerItem(100,20))
+	left_arm_box.addItem(QtGui.QSpacerItem(50,50))
+	right_arm_box.addItem(QtGui.QSpacerItem(50,50))
+        right_arm_box.addWidget(self.create_button('Relax right arm'))
+        right_arm_box.addWidget(self.create_button('Freeze right arm'))
+        left_arm_box.addWidget(self.create_button('Relax left arm'))
+        left_arm_box.addWidget(self.create_button('Freeze left arm'))
+        left_arm_box.addItem(QtGui.QSpacerItem(50,20))
+	right_arm_box.addItem(QtGui.QSpacerItem(50,20))
 
-        left_pose_saver = PoseSaver(PoseSaver.LEFT, self)
+	left_pose_saver = PoseSaver(PoseSaver.LEFT, self)
         right_pose_saver = PoseSaver(PoseSaver.RIGHT, self)
-        large_box.addWidget(self.create_button("Create left arm pose",
+        left_arm_box.addWidget(self.create_button("Create left arm pose",
               left_pose_saver.create_closure()))
-        large_box.addWidget(self.create_button("Create right arm pose",
+        right_arm_box.addWidget(self.create_button("Create right arm pose",
               right_pose_saver.create_closure()))
-        
-        #Dropdown boxes for saved poses
+        left_arm_box.addItem(QtGui.QSpacerItem(50,20))
+	right_arm_box.addItem(QtGui.QSpacerItem(50,20))
+
+	# Dropdown boxes for saved poses
         left_pose_loader = PoseLoader(PoseLoader.LEFT, self)
         right_pose_loader = PoseLoader(PoseLoader.RIGHT, self)
         self.combo_box_left = left_pose_loader.create_button()
         self.combo_box_right = right_pose_loader.create_button()
-        large_box.addWidget(self.combo_box_left)
-        large_box.addWidget(self.combo_box_right)
+        left_arm_box.addWidget(self.combo_box_left)
+        right_arm_box.addWidget(self.combo_box_right)
+
+        left_pose_option_box = QtGui.QHBoxLayout()
+	right_pose_option_box = QtGui.QHBoxLayout()
+        right_pose_option_box.addWidget(self.create_button('Move to pose (R)'))
+        left_pose_option_box.addWidget(self.create_button('Move to pose (L)'))
+
+	# Buttons for deleting poses for left/right arms
+        left_pose_option_box.addWidget(self.create_button('Delete pose (L)'))
+        right_pose_option_box.addWidget(self.create_button('Delete pose (R)'))
+
+	left_arm_box.addLayout(left_pose_option_box)
+	right_arm_box.addLayout(right_pose_option_box)
+        left_arm_box.addItem(QtGui.QSpacerItem(50,50))
+	right_arm_box.addItem(QtGui.QSpacerItem(50,50))
+
+	arm_box.addLayout(left_arm_box)
+	arm_box.addItem(QtGui.QSpacerItem(20, 20))
+	arm_box.addLayout(right_arm_box)
+        large_box.addLayout(arm_box)
        
-        #Initialize state of saved arm poses for selected dropdowns
+        # Initialize state of saved arm poses for selected dropdowns
         self.update_saved_l_arm_pose()
         self.update_saved_r_arm_pose()
 
-        #Update saved arm pose data on the changing of selected pose
+        # Update saved arm pose data on the changing of selected pose
         self.combo_box_left.connect(self.combo_box_left, 
                 QtCore.SIGNAL("currentIndexChanged(QString)"), self.update_saved_l_arm_pose)
         self.combo_box_right.connect(self.combo_box_right, 
                 QtCore.SIGNAL("currentIndexChanged(QString)"), self.update_saved_r_arm_pose)
         print(self.saved_r_arm_pose)
 
-        #Buttons for deleting poses for left/right arms
-        button_box2.addWidget(self.create_button('Delete pose: left'))
-        button_box2.addWidget(self.create_button('Delete pose: right'))
-
-        large_box.addStretch(1)
         self._widget.setObjectName('ArmGUI')
         self._widget.setLayout(large_box)
         context.add_widget(self._widget)
+	self._widget.setStyleSheet("QWidget { image: url(%s) }" %
+                (str(os.path.dirname(os.path.realpath(__file__))) +
+                "/../../arm_gui_bg_large.png"))
         rospy.loginfo('GUI initialization complete.')
 
     def create_button(self, name, method=None):
@@ -155,13 +173,13 @@ class ArmGUI(Plugin):
             self.relax_arm('l')
         elif (button_name == 'Freeze left arm'):
             self.freeze_arm('l')
-        elif (button_name == 'Move right arm to saved pose'):
+        elif (button_name == 'Move to pose (R)'):
             self.move_arm('r')
-        elif (button_name == 'Move left arm to saved pose'):
+        elif (button_name == 'Move to pose (L)'):
             self.move_arm('l')
-        elif (button_name == 'Delete pose: left'):
+        elif (button_name == 'Delete pose (L)'):
             self.delete_pose_left()
-        elif (button_name == 'Delete pose: right'):
+        elif (button_name == 'Delete pose (R)'):
             self.delete_pose_right()
 
     def update_saved_l_arm_pose(self):
