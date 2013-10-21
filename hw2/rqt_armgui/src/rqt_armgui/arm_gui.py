@@ -119,14 +119,27 @@ class ArmGUI(Plugin):
               left_pose_saver.create_closure()))
         large_box.addWidget(self.create_button("Create right arm pose",
               right_pose_saver.create_closure()))
-
+        
+        #Dropdown boxes for saved poses
         left_pose_loader = PoseLoader(PoseLoader.LEFT, self)
         right_pose_loader = PoseLoader(PoseLoader.RIGHT, self)
         self.combo_box_left = left_pose_loader.create_button()
         self.combo_box_right = right_pose_loader.create_button()
         large_box.addWidget(self.combo_box_left)
         large_box.addWidget(self.combo_box_right)
+       
+        #Initialize state of saved arm poses for selected dropdowns
+        self.update_saved_l_arm_pose()
+        self.update_saved_r_arm_pose()
 
+        #Update saved arm pose data on the changing of selected pose
+        self.combo_box_left.connect(self.combo_box_left, 
+                QtCore.SIGNAL("currentIndexChanged(QString)"), self.update_saved_l_arm_pose)
+        self.combo_box_right.connect(self.combo_box_right, 
+                QtCore.SIGNAL("currentIndexChanged(QString)"), self.update_saved_r_arm_pose)
+        print(self.saved_r_arm_pose)
+
+        #Buttons for deleting poses for left/right arms
         button_box2.addWidget(self.create_button('Delete pose: left'))
         button_box2.addWidget(self.create_button('Delete pose: right'))
 
@@ -135,7 +148,7 @@ class ArmGUI(Plugin):
         self._widget.setLayout(large_box)
         context.add_widget(self._widget)
         rospy.loginfo('GUI initialization complete.')
-        
+
     def create_button(self, name, method=None):
         if method == None:
           method = self.command_cb
@@ -166,15 +179,34 @@ class ArmGUI(Plugin):
         elif (button_name == 'Delete pose: right'):
             self.delete_pose_right()
 
+    def update_saved_l_arm_pose(self):
+        selected_index = self.combo_box_left.currentIndex()
+        if(selected_index == -1):
+            self.saved_l_arm_pose = None
+        else:
+            self.saved_l_arm_pose = self.combo_box_left.itemData(selected_index)
+        print("END OF UPDATE LEFT")
+
+    def update_saved_r_arm_pose(self):
+        selected_index = self.combo_box_right.currentIndex()
+        if(selected_index == -1):
+            self.saved_r_arm_pose = None
+        else:
+            self.saved_r_arm_pose = self.combo_box_right.itemData(selected_index)
+            print(self.saved_r_arm_pose)
+        print("END OF UPDATE RIGHT")
+
     def delete_pose_left(self):
         selected_index = self.combo_box_left.currentIndex()
-        self.arm_db.rmPos('l', self.combo_box_left.itemText(selected_index))
-        self.combo_box_left.removeItem(selected_index)
+        if (selectedIndex != -1):
+            self.arm_db.rmPos('l', self.combo_box_left.itemText(selected_index))
+            self.combo_box_left.removeItem(selected_index)
         
-    def delete_pose_right(self):
+    def delete_pose_right(self): 
         selected_index = self.combo_box_right.currentIndex()
-        self.arm_db.rmPos('r', self.combo_box_right.itemText(selected_index))
-        self.combo_box_right.removeItem(selected_index)
+        if (selected_index != -1):
+            self.arm_db.rmPos('r', self.combo_box_right.itemText(selected_index))
+            self.combo_box_right.removeItem(selected_index)
 
     def save_pose(self, side_prefix):
         if (side_prefix == 'r'):

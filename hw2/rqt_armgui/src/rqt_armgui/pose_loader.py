@@ -24,46 +24,6 @@ from sensor_msgs.msg import JointState
 from actionlib import SimpleActionClient
 from arm_db import ArmDB
 
-class PoseLoaderDialog(QtGui.QDialog):
-    def __init__(self, parent=None):
-        # TODO: init
-        QtGui.QDialog.__init__(self, parent)
-        self.setObjectName('PoseLoader')
-
-        large_box = QtGui.QVBoxLayout()
-        # add things here
-
-        # Textbox to enter words for PR2 to say 
-        default_text = "New pose 1"  # TODO: increment the number!
-        name_textbox = QtGui.QLineEdit(default_text)
-        name_textbox.setFixedWidth(450)
-        
-        # Set a handler on the textbox to retrieve the text when button clicked
-        self.name_textbox = name_textbox
-
-        button_box = QtGui.QHBoxLayout()
-        button_box.addItem(QtGui.QSpacerItem(15,20))
-        save_button = self.create_button('Save!', self.save_pose)
-        save_button.setDefault(True)
-        button_box.addWidget(save_button)
-        button_box.addWidget(name_textbox)
-        button_box.addStretch(1)
-        large_box.addLayout(button_box)
-
-        self.setLayout(large_box)
-
-    # TODO: GUI stuff!
-    def create_button(self, name, method):
-        btn = QtGui.QPushButton(name, self)
-        btn.clicked.connect(method)
-        # btn.setAutoRepeat(True)
-        return btn
-
-    def save_pose(self):
-        qWarning('Saving pose as: ' + self.name_textbox.text())
-        # TODO
-        self.accept()
-
 class PoseLoader():
     LEFT = 'l'
     RIGHT = 'r'
