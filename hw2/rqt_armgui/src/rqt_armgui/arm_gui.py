@@ -96,22 +96,11 @@ class ArmGUI(Plugin):
         large_box.addItem(QtGui.QSpacerItem(100,20))
 
         button_box2 = QtGui.QHBoxLayout()
-        button_box2.addWidget(self.create_button('Save right arm pose'))
-        button_box2.addWidget(self.create_button('Save left arm pose'))
         button_box2.addWidget(self.create_button('Move right arm to saved pose'))
         button_box2.addWidget(self.create_button('Move left arm to saved pose'))
         button_box2.addStretch(1)
         large_box.addLayout(button_box2)
         large_box.addItem(QtGui.QSpacerItem(100,20))
-
-        state_box = QtGui.QHBoxLayout()
-        self.r_state_label = QtGui.QLabel('Saved right arm pose: None')
-        self.l_state_label = QtGui.QLabel('Saved left arm pose: None')
-        state_box.addWidget(self.r_state_label)
-        state_box.addItem(QtGui.QSpacerItem(50,20))
-        state_box.addWidget(self.l_state_label)
-        state_box.addStretch(1)
-        large_box.addLayout(state_box)
 
         left_pose_saver = PoseSaver(PoseSaver.LEFT, self)
         right_pose_saver = PoseSaver(PoseSaver.RIGHT, self)
@@ -166,10 +155,6 @@ class ArmGUI(Plugin):
             self.relax_arm('l')
         elif (button_name == 'Freeze left arm'):
             self.freeze_arm('l')
-        elif (button_name == 'Save right arm pose'):
-            self.save_pose('r')
-        elif (button_name == 'Save left arm pose'):
-            self.save_pose('l')
         elif (button_name == 'Move right arm to saved pose'):
             self.move_arm('r')
         elif (button_name == 'Move left arm to saved pose'):
@@ -207,14 +192,6 @@ class ArmGUI(Plugin):
         if (selected_index != -1):
             self.arm_db.rmPos('r', self.combo_box_right.itemText(selected_index))
             self.combo_box_right.removeItem(selected_index)
-
-    def save_pose(self, side_prefix):
-        if (side_prefix == 'r'):
-            self.saved_r_arm_pose = self.get_joint_state('r')
-            self.r_state_label.setText('Saved right arm pose: ' + str(self.saved_r_arm_pose))
-        else:
-            self.saved_l_arm_pose = self.get_joint_state('l')
-            self.l_state_label.setText('Saved left arm pose: ' + str(self.saved_l_arm_pose))
 
     def move_arm(self, side_prefix):
         if (side_prefix == 'r'):
