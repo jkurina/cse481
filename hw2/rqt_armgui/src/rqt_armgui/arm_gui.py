@@ -198,7 +198,7 @@ class ArmGUI(Plugin):
 
     def delete_pose_left(self):
         selected_index = self.combo_box_left.currentIndex()
-        if (selectedIndex != -1):
+        if (selected_index != -1):
             self.arm_db.rmPos('l', self.combo_box_left.itemText(selected_index))
             self.combo_box_left.removeItem(selected_index)
         

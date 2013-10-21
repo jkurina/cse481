@@ -23,8 +23,13 @@ from pr2_mechanism_msgs.srv import SwitchController
 from sensor_msgs.msg import JointState
 from actionlib import SimpleActionClient
 
+from arm_db import ArmDB
+
 class PoseSaverDialog(QtGui.QDialog):
-    def __init__(self, parent=None):
+    def __init__(self, side, gui, parent=None):
+        self.side = side
+        self.gui = gui
+
         # TODO: init
         QtGui.QDialog.__init__(self, parent)
         self.setObjectName('PoseSaver')
@@ -59,8 +64,22 @@ class PoseSaverDialog(QtGui.QDialog):
         return btn
 
     def save_pose(self):
-        qWarning('Saving pose as: ' + self.name_textbox.text())
-        # TODO
+        # Add to database
+        name = self.name_textbox.text()
+        pose = self.gui.get_joint_state(self.side)
+        qWarning('Saving pose as: ' + name)
+        isAdded = self.gui.arm_db.savePos(self.side, name, pose)
+
+        if not isAdded:
+            # name already exists...
+            self.reject()
+            return
+
+        # Update GUI
+        if self.side == PoseSaver.LEFT:
+            self.gui.combo_box_left.addItem(name, pose)  # is this the right data to add?
+        else: # self.side == PoseSaver.RIGHT:
+            self.gui.combo_box_right.addItem(name, pose)
         self.accept()
 
 class PoseSaver():
@@ -80,7 +99,7 @@ class PoseSaver():
 
     def create_closure(self):
         def launch_popup():
-          self.dialog = PoseSaverDialog()
+          self.dialog = PoseSaverDialog(self.side, self.gui)
           self.dialog.show()
 
         return launch_popup
