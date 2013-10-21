@@ -36,7 +36,7 @@ class ArmGUI(Plugin):
         super(ArmGUI, self).__init__(context)
         self.setObjectName('ArmGUI')
         self._widget = QWidget()
-	self._widget.setFixedSize(525, 300)
+        self._widget.setFixedSize(525, 300)
         self.arm_db = ArmDB()
         
         # Action/service/message clients or servers
@@ -88,29 +88,29 @@ class ArmGUI(Plugin):
         
         large_box = QtGui.QVBoxLayout()
         
-	arm_box = QtGui.QHBoxLayout()
+        arm_box = QtGui.QHBoxLayout()
         right_arm_box = QtGui.QVBoxLayout()
-	left_arm_box = QtGui.QVBoxLayout()
+        left_arm_box = QtGui.QVBoxLayout()
 
-	left_arm_box.addItem(QtGui.QSpacerItem(50,50))
-	right_arm_box.addItem(QtGui.QSpacerItem(50,50))
+        left_arm_box.addItem(QtGui.QSpacerItem(50,50))
+        right_arm_box.addItem(QtGui.QSpacerItem(50,50))
         right_arm_box.addWidget(self.create_button('Relax right arm'))
         right_arm_box.addWidget(self.create_button('Freeze right arm'))
         left_arm_box.addWidget(self.create_button('Relax left arm'))
         left_arm_box.addWidget(self.create_button('Freeze left arm'))
         left_arm_box.addItem(QtGui.QSpacerItem(50,20))
-	right_arm_box.addItem(QtGui.QSpacerItem(50,20))
+        right_arm_box.addItem(QtGui.QSpacerItem(50,20))
 
-	left_pose_saver = PoseSaver(PoseSaver.LEFT, self)
+        left_pose_saver = PoseSaver(PoseSaver.LEFT, self)
         right_pose_saver = PoseSaver(PoseSaver.RIGHT, self)
         left_arm_box.addWidget(self.create_button("Create left arm pose",
               left_pose_saver.create_closure()))
         right_arm_box.addWidget(self.create_button("Create right arm pose",
               right_pose_saver.create_closure()))
         left_arm_box.addItem(QtGui.QSpacerItem(50,20))
-	right_arm_box.addItem(QtGui.QSpacerItem(50,20))
+        right_arm_box.addItem(QtGui.QSpacerItem(50,20))
 
-	# Dropdown boxes for saved poses
+        # Dropdown boxes for saved poses
         left_pose_loader = PoseLoader(PoseLoader.LEFT, self)
         right_pose_loader = PoseLoader(PoseLoader.RIGHT, self)
         self.combo_box_left = left_pose_loader.create_button()
@@ -119,22 +119,22 @@ class ArmGUI(Plugin):
         right_arm_box.addWidget(self.combo_box_right)
 
         left_pose_option_box = QtGui.QHBoxLayout()
-	right_pose_option_box = QtGui.QHBoxLayout()
+        right_pose_option_box = QtGui.QHBoxLayout()
         right_pose_option_box.addWidget(self.create_button('Move to pose (R)'))
         left_pose_option_box.addWidget(self.create_button('Move to pose (L)'))
 
-	# Buttons for deleting poses for left/right arms
+        # Buttons for deleting poses for left/right arms
         left_pose_option_box.addWidget(self.create_button('Delete pose (L)'))
         right_pose_option_box.addWidget(self.create_button('Delete pose (R)'))
 
-	left_arm_box.addLayout(left_pose_option_box)
-	right_arm_box.addLayout(right_pose_option_box)
+        left_arm_box.addLayout(left_pose_option_box)
+        right_arm_box.addLayout(right_pose_option_box)
         left_arm_box.addItem(QtGui.QSpacerItem(50,50))
-	right_arm_box.addItem(QtGui.QSpacerItem(50,50))
+        right_arm_box.addItem(QtGui.QSpacerItem(50,50))
 
-	arm_box.addLayout(left_arm_box)
-	arm_box.addItem(QtGui.QSpacerItem(20, 20))
-	arm_box.addLayout(right_arm_box)
+        arm_box.addLayout(left_arm_box)
+        arm_box.addItem(QtGui.QSpacerItem(20, 20))
+        arm_box.addLayout(right_arm_box)
         large_box.addLayout(arm_box)
        
         # Initialize state of saved arm poses for selected dropdowns
@@ -146,19 +146,18 @@ class ArmGUI(Plugin):
                 QtCore.SIGNAL("currentIndexChanged(QString)"), self.update_saved_l_arm_pose)
         self.combo_box_right.connect(self.combo_box_right, 
                 QtCore.SIGNAL("currentIndexChanged(QString)"), self.update_saved_r_arm_pose)
-        print(self.saved_r_arm_pose)
 
         self._widget.setObjectName('ArmGUI')
         self._widget.setLayout(large_box)
         context.add_widget(self._widget)
-	self._widget.setStyleSheet("QWidget { image: url(%s) }" %
-                (str(os.path.dirname(os.path.realpath(__file__))) +
-                "/../../arm_gui_bg_large.png"))
+        self._widget.setStyleSheet("QWidget { image: url(%s) }" %
+                    (str(os.path.dirname(os.path.realpath(__file__))) +
+                    "/../../arm_gui_bg_large.png"))
         rospy.loginfo('GUI initialization complete.')
 
     def create_button(self, name, method=None):
         if method == None:
-          method = self.command_cb
+            method = self.command_cb
         btn = QtGui.QPushButton(name, self._widget)
         btn.clicked.connect(method)
         return btn
@@ -188,7 +187,6 @@ class ArmGUI(Plugin):
             self.saved_l_arm_pose = None
         else:
             self.saved_l_arm_pose = self.combo_box_left.itemData(selected_index)
-        print("END OF UPDATE LEFT")
 
     def update_saved_r_arm_pose(self):
         selected_index = self.combo_box_right.currentIndex()
@@ -196,8 +194,6 @@ class ArmGUI(Plugin):
             self.saved_r_arm_pose = None
         else:
             self.saved_r_arm_pose = self.combo_box_right.itemData(selected_index)
-            print(self.saved_r_arm_pose)
-        print("END OF UPDATE RIGHT")
 
     def delete_pose_left(self):
         selected_index = self.combo_box_left.currentIndex()

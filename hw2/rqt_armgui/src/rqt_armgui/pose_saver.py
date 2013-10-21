@@ -30,12 +30,10 @@ class PoseSaverDialog(QtGui.QDialog):
         self.side = side
         self.gui = gui
 
-        # TODO: init
         QtGui.QDialog.__init__(self, parent)
         self.setObjectName('PoseSaver')
 
         large_box = QtGui.QVBoxLayout()
-        # add things here
 
         # Textbox to enter words for PR2 to say 
         default_text = self.get_default_name()
@@ -56,11 +54,9 @@ class PoseSaverDialog(QtGui.QDialog):
 
         self.setLayout(large_box)
 
-    # TODO: GUI stuff!
     def create_button(self, name, method):
         btn = QtGui.QPushButton(name, self)
         btn.clicked.connect(method)
-        # btn.setAutoRepeat(True)
         return btn
 
     def save_pose(self):
@@ -77,7 +73,7 @@ class PoseSaverDialog(QtGui.QDialog):
 
         # Update GUI
         if self.side == PoseSaver.LEFT:
-            self.gui.combo_box_left.addItem(name, pose)  # is this the right data to add?
+            self.gui.combo_box_left.addItem(name, pose)  
         else: # self.side == PoseSaver.RIGHT:
             self.gui.combo_box_right.addItem(name, pose)
         self.accept()

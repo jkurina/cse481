@@ -75,7 +75,7 @@ class ArmDB:
     def rmPos(self, side_prefix, name):
         return ArmDB.instance.rmPos(side_prefix, name)
 
-    #return a dict, from name to position(array)
+    # return a dict, from name to position(array)
     def getAllLeftPos(self):
         return ArmDB.instance.getAllLeftPos()
 
