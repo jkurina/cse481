@@ -97,18 +97,9 @@ class WaterGun(Plugin):
         head_box.addLayout(down_head_box)
         large_box.addLayout(head_box)
 
-
-        # Buttons to launch the arm-pose UI
-        arm = Arm(Arm.RIGHT, self)
-        right_arm = self.create_button('Right arm', arm.create_closure())
-        large_box.addWidget(right_arm)
-        arm = Arm(Arm.LEFT, self)
-        left_arm = self.create_button('Left arm', arm.create_closure())
-        large_box.addWidget(left_arm)
-
         # Buttons to move the grippers
         gripper = Gripper(Gripper.RIGHT, Gripper.OPEN, self)
-        right_gripper = self.create_button('Right proboscis',
+        right_gripper = self.create_button('Right gripper',
                 gripper.create_closure())
         gripper = Gripper(Gripper.LEFT, Gripper.OPEN, self)
         left_gripper = self.create_button('Left gripper', gripper.create_closure()) 
