@@ -52,7 +52,15 @@ class WaterPulse(Plugin):
         button_box.addWidget(sound_textbox)
         button_box.addStretch(1)
         large_box.addLayout(button_box)
-
+        
+        # 'Trick or Treat' & 'Thank You' Buttons
+        halloween_box = QtGui.QHBoxLayout()
+        halloween_box.addItem(QtGui.QSpacerItem(15,20))
+        halloween_box.addWidget(self.create_button('Trick or Treat', self.command_cb))
+        halloween_box.addWidget(self.create_button('Thank You', self.command_cb))
+        halloween_box.addStretch(1)
+        large_box.addLayout(halloween_box)
+        
         speech_box = QtGui.QHBoxLayout()
         speech_box.addItem(QtGui.QSpacerItem(15, 20))
         self.speech_label = QtGui.QLabel('Robot has not spoken yet')
@@ -203,6 +211,13 @@ class WaterPulse(Plugin):
         if (button_name == 'Speak'):
             qWarning('Robot will say: ' + self.sound_textbox.text())
             self._sound_client.say(self.sound_textbox.text())
+        elif (button_name == 'Trick or Treat'):
+            qWarning('Robot will say: Trick or Treat')
+            self._sound_client.say('Trick or Treat')
+        elif (button_name == 'Thank You'):
+            qWarning('Robot will say: Thank You')
+            self._sound_client.say('Thank You')
+
             
     def shutdown_plugin(self):
         # TODO unregister all publishers here
