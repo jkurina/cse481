@@ -7,7 +7,7 @@ import threading
 import rospy
 from numpy import array, sign, pi
 from kinematics_msgs.srv import GetKinematicSolverInfo
-from kinematics_msgs.srv import GetConstraintAwarePositionIK
+from kinematics_msgs.srv import GetPositionIK, GetPositionIKRequest
  
 
 
@@ -30,11 +30,11 @@ class IK:
         rospy.loginfo('Waiting for IK service to respond.')
         rospy.wait_for_service(ik_srv_name)
         self.ik_srv = rospy.ServiceProxy(ik_srv_name,
-                GetConstraintAwarePositionIK,
+                GetPositionIK,
                 persistent=True)
 
         # Set up common parts of an IK request
-        self.ik_request = GetConstraintAwarePositionIKRequest()
+        self.ik_request = GetPositionIKRequest()
         self.ik_request.timeout = rospy.Duration(4.0)
         self.ik_request.ik_request.ik_link_name = solver_info.kinematic_solver_info.link_names[0]
         self.ik_request.ik_request.pose_stamped.header.frame_id = 'base_link'
