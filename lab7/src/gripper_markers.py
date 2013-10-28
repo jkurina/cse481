@@ -73,11 +73,8 @@ class GripperMarkers:
         self.is_control_visible = False
         self.ee_pose = self.get_ee_pose()
         self.ik = IK(side_prefix)
-        print 'before'
         self.update_viz()
-        print 1
         self._menu_handler.apply(self._im_server, 'ik_target_marker_' + self.side_prefix)
-        print 2
         self._im_server.applyChanges()
         print self.ik
 
@@ -85,13 +82,15 @@ class GripperMarkers:
         from_frame = 'base_link'
         to_frame = self.side_prefix + '_wrist_roll_link'
         try:
-            print 'a'
-            t = self._tf_listener.getLatestCommonTime(from_frame, to_frame)
-            print 'b'
-            (pos, rot) = self._tf_listener.lookupTransform(from_frame, to_frame, t)
-            print 'c'
-        except:
+            if self._tf_listener.frameExists(from_frame) and self._tf_listener.frameExists(to_frame):
+                t = self._tf_listener.getLatestCommonTime(from_frame, to_frame)
+                # t = rospy.Time.now()
+                (pos, rot) = self._tf_listener.lookupTransform(to_frame, from_frame, t) # Note argument order :(
+            else:
+                rospy.logerr('TF frames do not exist; could not get end effector pose.')
+        except Exception as err:
             rospy.logerr('Could not get end effector pose through TF.')
+            rospy.logerr(err)
             pos = [1.0, 0.0, 1.0]
             rot = [0.0, 0.0, 0.0, 1.0]
 
