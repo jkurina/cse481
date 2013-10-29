@@ -244,7 +244,7 @@ class WaterPulse(Plugin):
 
             traj_goal.trajectory.joint_names = self.l_joint_names
             self.l_traj_action_client.send_goal(traj_goal)
-            time.sleep(5)
+            self.l_traj_action_client.wait_for_result(rospy.Duration.from_sec(5.0))
              
     def shutdown_plugin(self):
         # TODO unregister all publishers here
