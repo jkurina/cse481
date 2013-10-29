@@ -61,19 +61,6 @@ class WaterPulse(Plugin):
         halloween_box.addStretch(1)
         large_box.addLayout(halloween_box)
         
-        speech_box = QtGui.QHBoxLayout()
-        speech_box.addItem(QtGui.QSpacerItem(15, 20))
-        self.speech_label = QtGui.QLabel('Robot has not spoken yet')
-        palette = QtGui.QPalette()
-        palette.setColor(QtGui.QPalette.Foreground,QtCore.Qt.blue)
-        self.speech_label.setPalette(palette)
-        speech_box.addWidget(self.speech_label)
-
-        large_box.addLayout(speech_box)
-        large_box.addStretch(1)
-
-        #large_box.addItem(QtGui.QSpacerItem(50,20))
-
         # Buttons to move the PR2's head
         up_head = Head(Head.UP, self)
         head_box = QtGui.QVBoxLayout()
@@ -204,7 +191,6 @@ class WaterPulse(Plugin):
         qWarning('Received sound signal.')
         #if (sound_request.command == SoundRequest.SAY):
         qWarning('Robot said: ' + sound_request.arg)
-        self.speech_label.setText('Robot said: ' + sound_request.arg)
 
     def command_cb(self):
         button_name = self._widget.sender().text()
