@@ -19,11 +19,18 @@ from sound_play.libsoundplay import SoundClient
 from gripper import Gripper
 from head import Head
 from base import Base
+from control_msgs.msg import JointTrajectoryGoal
+from trajectory_msgs.msg import JointTrajectoryPoint
+from control_msgs.msg import JointTrajectoryAction
+from actionlib import SimpleActionClient
 import os
+import time
 
 class WaterPulse(Plugin):
 
     sound_sig = Signal(SoundRequest)
+    positions = [[-0.013001995432544766, -0.24895825213211362, -0.0055992576345036404, -1.7647281786034612, -496.3549908032631, -0.09960750521541717, 25.125128627428623], [0.0029160750999965845, -0.29700816845544387, 0.010917289481594317, -0.8034506550168371, -496.35799885178454, -0.09965101413551591, 25.12517213634872]]
+ 
 
     def __init__(self, context):
         super(WaterPulse, self).__init__(context)
@@ -33,6 +40,23 @@ class WaterPulse(Plugin):
         self._sound_client = SoundClient()
         rospy.Subscriber('robotsound', SoundRequest, self.sound_cb)
 
+        self.l_joint_names = ['l_shoulder_pan_joint',
+                              'l_shoulder_lift_joint',
+                              'l_upper_arm_roll_joint',
+                              'l_elbow_flex_joint',
+                              'l_forearm_roll_joint',
+                              'l_wrist_flex_joint',
+                              'l_wrist_roll_joint']
+ 
+        l_traj_contoller_name = None
+        l_traj_controller_name = '/l_arm_controller/joint_trajectory_action'
+	self.l_traj_action_client = SimpleActionClient(l_traj_controller_name,
+		JointTrajectoryAction)
+	rospy.loginfo('Waiting for a response from the trajectory '
+		+ 'action server for LEFT arm...')
+	self.l_traj_action_client.wait_for_server()
+
+         
         QtGui.QToolTip.setFont(QtGui.QFont('SansSerif', 10))
         self.sound_sig.connect(self.sound_sig_cb)
         
@@ -97,11 +121,13 @@ class WaterPulse(Plugin):
                 gripper.create_closure())
         gripper = Gripper(Gripper.LEFT, Gripper.OPEN, self)
         left_gripper = self.create_button('Left gripper', gripper.create_closure()) 
+        knock_button = self.create_button('Knock', self.knock)
         large_box.addItem(QtGui.QSpacerItem(100,250))
         gripper_box = QtGui.QHBoxLayout()
         gripper_box.addItem(QtGui.QSpacerItem(75,20))
         gripper_box.addWidget(left_gripper)
         gripper_box.addItem(QtGui.QSpacerItem(450,20))
+        gripper_box.addWidget(knock_button)
         gripper_box.addWidget(right_gripper)
         gripper_box.addItem(QtGui.QSpacerItem(75,20))
         large_box.addLayout(gripper_box)
@@ -204,12 +230,28 @@ class WaterPulse(Plugin):
             qWarning('Robot will say: Thank You')
             self._sound_client.say('Thank You')
 
-            
+    def knock(self):
+        for position in WaterPulse.positions:
+            velocities = [0] * len(position)
+            traj_goal = JointTrajectoryGoal()
+            traj_goal.trajectory.header.stamp = (rospy.Time.now() +
+                    rospy.Duration(0.1))
+            time_to_joint = 2.0
+            traj_goal.trajectory.points.append(JointTrajectoryPoint(
+                                  positions=position,
+                                  velocities=velocities,
+                                  time_from_start=rospy.Duration(time_to_joint)))
+
+            traj_goal.trajectory.joint_names = self.l_joint_names
+            self.l_traj_action_client.send_goal(traj_goal)
+            time.sleep(5)
+             
     def shutdown_plugin(self):
         # TODO unregister all publishers here
         pass
 
     def save_settings(self, plugin_settings, instance_settings):
+
         # TODO save intrinsic configuration, usually using:
         # instance_settings.set_value(k, v)
         pass
