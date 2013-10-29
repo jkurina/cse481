@@ -40,9 +40,6 @@ class PoseLoader():
         else: # self.side == PoseLoader.RIGHT:
           return "Right arm pose loader!"
 
-    def load_pose(self, index):
-        qWarning('Selected pose ' + index)
-
     def create_button(self):
         # self.data is a dictionary name-->array[positions]
         if self.side == PoseLoader.LEFT:
@@ -53,5 +50,4 @@ class PoseLoader():
         combo_box = QComboBox()
         for key in self.data.keys():
             combo_box.addItem(key, self.data.get(key))
-        combo_box.activated.connect(self.load_pose)
         return combo_box

@@ -7,10 +7,15 @@ roslib.load_manifest('control_msgs')
 roslib.load_manifest('pr2_mechanism_msgs')
 roslib.load_manifest('sensor_msgs')
 roslib.load_manifest('actionlib')
+roslib.load_manifest('kinematics_msgs')
+roslib.load_manifest('tf')
 
 from subprocess import call
 import threading
 import rospy
+import tf
+from tf import TransformListener
+from geometry_msgs.msg import Quaternion, Vector3, Point, Pose
 from qt_gui.plugin import Plugin
 from python_qt_binding import QtGui,QtCore
 from python_qt_binding.QtGui import QWidget, QFrame
@@ -22,10 +27,12 @@ from control_msgs.msg import JointTrajectoryAction
 from pr2_mechanism_msgs.srv import SwitchController
 from sensor_msgs.msg import JointState
 from actionlib import SimpleActionClient
+from kinematics_msgs.srv import GetPositionFK, GetPositionFKRequest
 
 from pose_saver import PoseSaver
 from pose_loader import PoseLoader
 from arm_db import ArmDB
+from fk import FK
 import os
 
 class HalloweenGUI(Plugin):
@@ -38,6 +45,7 @@ class HalloweenGUI(Plugin):
         self._widget = QWidget()
         self._widget.setFixedSize(525, 300)
         self.arm_db = ArmDB()
+        self._tf_listener = TransformListener()
         
         # Action/service/message clients or servers
         
@@ -85,6 +93,9 @@ class HalloweenGUI(Plugin):
         
         QtGui.QToolTip.setFont(QtGui.QFont('SansSerif', 10))
         self.joint_sig.connect(self.joint_sig_cb)
+
+        self.left_fk = FK('l', self)
+        self.right_fk = FK('r', self)
         
         large_box = QtGui.QVBoxLayout()
         
@@ -207,21 +218,34 @@ class HalloweenGUI(Plugin):
             self.arm_db.rmPos('r', self.combo_box_right.itemText(selected_index))
             self.combo_box_right.removeItem(selected_index)
 
+    def pose_distance(self, source, dest):
+        dist = 0
+        dist += (source.position.x - dest.position.x)^2
+        dist += (source.position.y - dest.position.y)^2
+        dist += (source.position.z - dest.position.z)^2
+        return dist
+
     def move_arm(self, side_prefix):
+        ee_pose = self.get_ee_pose(side_prefix)
+        rospy.logerr(ee_pose)
+        # forward kinematics
         if (side_prefix == 'r'):
             if self.saved_r_arm_pose is None:
                 rospy.logerr('Target pose for right arm is None, cannot move.')
             else:
-                self.freeze_arm('r')
-                self.move_to_joints('r', self.saved_r_arm_pose, 2.0)
-        else:
+                self.freeze_arm(side_prefix)
+                # saved_pose = self.right_fk.get_ee_for_joints(self.saved_r_arm_pose)
+                time_to_joints = 2.0 # * self.pose_distance(ee_pose, saved_pose)
+                self.move_to_joints(side_prefix, self.saved_r_arm_pose, time_to_joints)
+        else: # side_prefix == 'l'
             if self.saved_l_arm_pose is None:
                 rospy.logerr('Target pose for left arm is None, cannot move.')
             else:
-                self.freeze_arm('l')
-                self.move_to_joints('l', self.saved_l_arm_pose, 2.0)
+                self.freeze_arm(side_prefix)
+                # saved_pose = self.left_fk.get_ee_for_joints(self.saved_l_arm_pose)
+                time_to_joints = 2.0 # * self.pose_distance(ee_pose, saved_pose)
+                self.move_to_joints(side_prefix, self.saved_l_arm_pose, time_to_joints)
                 pass
-
 
     def move_to_joints(self, side_prefix, positions, time_to_joint):
         '''Moves the arm to the desired joints'''
@@ -311,4 +335,23 @@ class HalloweenGUI(Plugin):
         # TODO restore intrinsic configuration, usually using:
         # v = instance_settings.value(k)
         pass
+
+    def get_ee_pose(self, side_prefix):
+        from_frame = 'base_link'
+        to_frame = side_prefix + '_wrist_roll_link'
+        try:
+            if self._tf_listener.frameExists(from_frame) and self._tf_listener.frameExists(to_frame):
+                t = self._tf_listener.getLatestCommonTime(from_frame, to_frame)
+                # t = rospy.Time.now()
+                (pos, rot) = self._tf_listener.lookupTransform(to_frame, from_frame, t) # Note argument order :(
+            else:
+                rospy.logerr('TF frames do not exist; could not get end effector pose.')
+        except Exception as err:
+            rospy.logerr('Could not get end effector pose through TF.')
+            rospy.logerr(err)
+            pos = [1.0, 0.0, 1.0]
+            rot = [0.0, 0.0, 0.0, 1.0]
+
+        return Pose(Point(pos[0], pos[1], pos[2]),
+                Quaternion(rot[0], rot[1], rot[2], rot[3]))
 
