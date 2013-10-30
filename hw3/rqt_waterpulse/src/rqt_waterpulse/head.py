@@ -17,6 +17,7 @@ class Head():
     RIGHT = 'r'
     UP = 'u'
     DOWN = 'd'
+    speed = 1
 
     def __init__(self, direction, gui):
         assert(direction == Head.LEFT or direction == Head.RIGHT
@@ -29,14 +30,15 @@ class Head():
 
     def get_target(self):
         point = Point(0, 0, 0)
+        head_speed = Head.speed * 0.1
         if (self.direction == Head.LEFT):
-            point = Point(1, 0.2, 0)
+            point = Point(1, head_speed, 0)
         elif (self.direction == Head.RIGHT):
-            point = Point(1, -0.2, 0)
+            point = Point(1, -head_speed, 0)
         elif (self.direction == Head.UP):
-            point = Point(1, 0, 0.1)
-        else:  # Head.DOWN
-            point = Point(1, 0, -0.1)
+            point = Point(1, 0, head_speed)
+        elif (self.direction == Head.DOWN):  # Head.DOWN
+            point = Point(1, 0, -head_speed)
         return point
 
     def create_closure(self):
@@ -50,13 +52,17 @@ class Head():
             head_goal.target.header.frame_id = self.get_frame()
             head_goal.min_duration = rospy.Duration(0.3)
             head_goal.target.point = self.get_target()
-            head_goal.max_velocity = 0.15
+            head_goal.max_velocity = 10.0
             head_client.send_goal(head_goal)
-            head_client.wait_for_result(rospy.Duration(10.0))
+            head_client.wait_for_result(rospy.Duration(2.0))
 
             if (head_client.get_state() != GoalStatus.SUCCEEDED):
                 rospy.logwarn('Head action unsuccessful.')
             
             self.gui.show_text_in_rviz("Head!")
         return move_head
+
+    @staticmethod
+    def set_speed(value):
+        Head.speed = value
 
