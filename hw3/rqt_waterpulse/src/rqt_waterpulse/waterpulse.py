@@ -99,6 +99,12 @@ class WaterPulse(Plugin):
         left_head_button = self.create_button('<', left_head.create_closure())
         left_right_head_box = QtGui.QHBoxLayout()
 
+        head_speed_sld = QtGui.QSlider(QtCore.Qt.Horizontal)
+        head_speed_sld.setFocusPolicy(QtCore.Qt.NoFocus)
+        head_speed_sld.setMinimum(1)
+        head_speed_sld.setMaximum(5)
+        head_speed_sld.valueChanged[int].connect(Head.set_speed)
+
         up_head_box.addItem(QtGui.QSpacerItem(235,20))
         up_head_box.addWidget(up_head_button)
         up_head_box.addItem(QtGui.QSpacerItem(275,20))
@@ -110,10 +116,15 @@ class WaterPulse(Plugin):
         down_head_box.addItem(QtGui.QSpacerItem(235,20))
         down_head_box.addWidget(down_head_button)
         down_head_box.addItem(QtGui.QSpacerItem(275,20))
+        head_sld_box = QtGui.QHBoxLayout()
+        head_sld_box.addItem(QtGui.QSpacerItem(225,20))
+        head_sld_box.addWidget(head_speed_sld)
+        head_sld_box.addItem(QtGui.QSpacerItem(225,20))
         head_box.addLayout(up_head_box)
         head_box.addLayout(left_right_head_box)
         head_box.addLayout(down_head_box)
-        large_box.addLayout(head_box)
+        head_box.addLayout(head_sld_box)
+        large_box.addLayout(head_box)        
 
         # Buttons to move the grippers
         gripper = Gripper(Gripper.RIGHT, Gripper.OPEN, self)
@@ -126,8 +137,8 @@ class WaterPulse(Plugin):
         gripper_box = QtGui.QHBoxLayout()
         gripper_box.addItem(QtGui.QSpacerItem(75,20))
         gripper_box.addWidget(left_gripper)
-        gripper_box.addItem(QtGui.QSpacerItem(450,20))
         gripper_box.addWidget(knock_button)
+        gripper_box.addItem(QtGui.QSpacerItem(450,20))
         gripper_box.addWidget(right_gripper)
         gripper_box.addItem(QtGui.QSpacerItem(75,20))
         large_box.addLayout(gripper_box)
@@ -244,8 +255,13 @@ class WaterPulse(Plugin):
 
             traj_goal.trajectory.joint_names = self.l_joint_names
             self.l_traj_action_client.send_goal(traj_goal)
-            time.sleep(5)
-             
+            result = 0
+            while(result < 2): # ACTIVE or PENDING
+                self.l_traj_action_client.wait_for_result()
+                result = self.l_traj_action_client.get_result()
+            #self.l_traj_action_client.wait_for_result()
+            #time.sleep(1)
+        
     def shutdown_plugin(self):
         # TODO unregister all publishers here
         pass
