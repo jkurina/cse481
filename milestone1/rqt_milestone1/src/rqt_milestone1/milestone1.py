@@ -22,6 +22,7 @@ from control_msgs.msg import JointTrajectoryAction
 from sensor_msgs.msg import JointState
 from actionlib import SimpleActionClient
 from trajectory_msgs.msg import JointTrajectoryPoint
+from navigation import move_to_shelf
 import os
 
 
@@ -87,6 +88,9 @@ class Milestone1GUI(Plugin):
         large_box.addLayout(button_box)
 
 
+        # Button to move to shelf
+        nav_button = self.create_button('navigate', move_to_shelf)
+        
         self._widget.setObjectName('Milestone1GUI')
         self._widget.setLayout(large_box)
         context.add_widget(self._widget)
