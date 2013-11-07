@@ -16,6 +16,7 @@ from python_qt_binding.QtGui import QGroupBox
 from python_qt_binding.QtCore import QSignalMapper, qWarning, Signal
 from sound_play.msg import SoundRequest
 from sound_play.libsoundplay import SoundClient
+from navigation import move_to_shelf
 import os
 
 class Milestone1GUI(Plugin):
@@ -33,6 +34,8 @@ class Milestone1GUI(Plugin):
         
         large_box = QtGui.QVBoxLayout()
 
+        # Button to move to shelf
+        nav_button = self.create_button('navigate', move_to_shelf)
         
         self._widget.setObjectName('Milestone1GUI')
         self._widget.setLayout(large_box)
