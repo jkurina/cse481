@@ -7,10 +7,11 @@ import numpy
 import rospy
 from actionlib import SimpleActionClient
 from actionlib_msgs.msg import GoalStatus
-from move_base_msgs import MoveBaseAction
-from move_base_msgs.msg import MoveBaseGoal
+from geometry_msgs.msg import PoseStamped
+# TODO imports
 
-def move_to_shelf():
+# broken :(((((
+def move_to_shelfz():
     client = SimpleActionClient('move_base', MoveBaseAction)
     client.wait_for_server()
     goal = MoveBaseGoal()
@@ -21,3 +22,15 @@ def move_to_shelf():
     client.send_goal(goal)
     client.wait_for_result()
     print ("moved!")
+
+def move_to_shelf():
+    pub = rospy.Publisher('/move_base_simple/goal', PoseStamped)
+    msg = PoseStamped()
+    msg.header.frame_id = "map"
+    msg.header.stamp = rospy.Time.now()
+    msg.pose.position.x = 0.380967617035
+    msg.pose.position.y = -1.6217675209
+    msg.pose.orientation.z = 0.953879350922
+    msg.pose.orientation.w = -0.300190246152
+    pub.publish(msg)
+    print("moved!")
