@@ -23,23 +23,22 @@ from sensor_msgs.msg import JointState
 from actionlib import SimpleActionClient
 from trajectory_msgs.msg import JointTrajectoryPoint
 from navigation import move_to_shelf
+from gripper import Gripper
 import os
 
 
 class Milestone1GUI(Plugin):
 
-    RECIEVE_FROM_HUMAN_L_POS = [-0.11953699873627144, -0.015476264363818703, 0.05020422194221652, -0.14995566383159287, 50.24253872219175, -0.08894781979101685, 14.235824877202386]
     RECIEVE_FROM_HUMAN_R_POS = [0.09367691677227741, -0.01756165017492318, -0.08136022417629407, -0.1544435558844821, 6.30432982194113, -0.09030261188385946, -32.993813431756145]
-    READ_FIDUCIAL_L_POS = [0.1110873064172444, -0.09318951143030572, -0.10445131917355743, -1.400340298051122, 6.288248331768874, -0.23932066322496848, -33.10010572355945] 
-    READ_FIDUCIAL_R_POS = [-0.09035386942661228, -0.09296521392749924, 0.11739289419119903, -1.4097503942910512, 50.25757896479891, -0.12453811643248647, 14.217551130760555]
-    PLACE_ON_SHELF_L_POS = [0.09516923588470316, 0.029726911840466965, -0.15544415395918154, -0.14879749814052468, 6.490828830269738, -0.08351522034832204, -33.09301376958322]
-    PLACE_ON_SHELF_R_POS = [-0.08952480325304246, 0.03155851288225806, 0.4005795175604179, -0.14908703956329128, 49.939015056962155, -0.08494499914185327, 14.156203553420127]
+    RECIEVE_FROM_HUMAN_L_POS = [-0.11953699873627144, -0.015476264363818703, 0.05020422194221652, -0.14995566383159287, 50.24253872219175, -0.08894781979101685, 14.235824877202386]
+    READ_FIDUCIAL_R_POS = [0.1110873064172444, -0.09318951143030572, -0.10445131917355743, -1.400340298051122, 6.288248331768874, -0.23932066322496848, -33.10010572355945] 
+    READ_FIDUCIAL_L_POS = [-0.09035386942661228, -0.09296521392749924, 0.11739289419119903, -1.4097503942910512, 50.25757896479891, -0.12453811643248647, 14.217551130760555]
+    PLACE_ON_SHELF_R_POS = [0.09516923588470316, 0.029726911840466965, -0.15544415395918154, -0.14879749814052468, 6.490828830269738, -0.08351522034832204, -33.09301376958322]
+    PLACE_ON_SHELF_L_POS = [-0.08952480325304246, 0.03155851288225806, 0.4005795175604179, -0.14908703956329128, 49.939015056962155, -0.08494499914185327, 14.156203553420127]
     sound_sig = Signal(SoundRequest)
 
     def __init__(self, context):
         super(Milestone1GUI, self).__init__(context)
-        self._widget = QWidget()
-        self._widget.setFixedSize(600, 600)
         self._sound_client = SoundClient()
         rospy.Subscriber('robotsound', SoundRequest, self.sound_cb)
         switch_srv_name = 'pr2_controller_manager/switch_controller'
@@ -74,6 +73,12 @@ class Milestone1GUI(Plugin):
         rospy.loginfo('Waiting for a response from the trajectory action server for LEFT arm...')
         self.l_traj_action_client.wait_for_server()
 
+        #init gripper
+        self.l_gripper = Gripper('l')
+        self.r_gripper = Gripper('r')
+
+        self._widget = QWidget()
+        self._widget.setFixedSize(600, 600)
         QtGui.QToolTip.setFont(QtGui.QFont('SansSerif', 10))
         
         large_box = QtGui.QVBoxLayout()
@@ -110,24 +115,32 @@ class Milestone1GUI(Plugin):
 
     def command_cb(self):
         button_name = self._widget.sender().text()
-        if (button_name == 'Prepare to Take'):
+        if (button_name == 'Prepare To Take'):
+            #open gripper
             self.saved_l_arm_pose = Milestone1GUI.RECIEVE_FROM_HUMAN_L_POS
             self.saved_r_arm_pose = Milestone1GUI.RECIEVE_FROM_HUMAN_R_POS
             self.move_arm('l')
             self.move_arm('r')
+            self.l_gripper.open_gripper()
+            self.r_gripper.open_gripper(True)
         elif (button_name == 'Take From Human'):
+            #close gripper
+            self.l_gripper.close_gripper()
+            self.r_gripper.close_gripper(True)
             self.saved_l_arm_pose = Milestone1GUI.READ_FIDUCIAL_L_POS
             self.saved_r_arm_pose = Milestone1GUI.READ_FIDUCIAL_R_POS
             self.move_arm('l')
             self.move_arm('r')
-            #CALL FIDUCIAL RECOGNITION
+            #TODO CALL FIDUCIAL RECOGNITION
         elif (button_name == 'Place On Shelf'): 
             self.saved_l_arm_pose = Milestone1GUI.PLACE_ON_SHELF_L_POS
             self.saved_r_arm_pose = Milestone1GUI.PLACE_ON_SHELF_R_POS
             self.move_arm('l')
-            self.move_arm('r')
+            self.move_arm('r', True)
+            self.l_gripper.open_gripper()
+            self.r_gripper.open_gripper(True)
     
-    def move_arm(self, side_prefix):
+    def move_arm(self, side_prefix, wait = False):
         # forward kinematics
         if (side_prefix == 'r'):
             if self.saved_r_arm_pose is None:
@@ -135,14 +148,14 @@ class Milestone1GUI(Plugin):
             else:
                 self.freeze_arm(side_prefix)
                 time_to_joints = 2.0 
-                self.move_to_joints(side_prefix, self.saved_r_arm_pose, time_to_joints)
+                self.move_to_joints(side_prefix, self.saved_r_arm_pose, time_to_joints, wait)
         else: # side_prefix == 'l'
             if self.saved_l_arm_pose is None:
                 rospy.logerr('Target pose for left arm is None, cannot move.')
             else:
                 self.freeze_arm(side_prefix)
                 time_to_joints = 2.0
-                self.move_to_joints(side_prefix, self.saved_l_arm_pose, time_to_joints)
+                self.move_to_joints(side_prefix, self.saved_l_arm_pose, time_to_joints, wait)
                 pass
 
     def freeze_arm(self, side_prefix):
@@ -195,18 +208,30 @@ class Milestone1GUI(Plugin):
         self.lock.release()
         return positions
 
-    def move_to_joints(self, side_prefix, positions, time_to_joint):
+    def move_to_joints(self, side_prefix, positions, time_to_joint, wait = False):
         '''Moves the arm to the desired joints'''
         velocities = [0] * len(positions)
         traj_goal = JointTrajectoryGoal()
         traj_goal.trajectory.header.stamp = (rospy.Time.now() + rospy.Duration(0.1))
-        traj_goal.trajectory.points.append(JointTrajectoryPoint(positions=positions,
-                            velocities=velocities, time_from_start=rospy.Duration(time_to_joint)))
-        
+        traj_goal.trajectory.points.append(JointTrajectoryPoint(positions=positions, velocities=velocities, time_from_start=rospy.Duration(time_to_joint)))
+       
         if (side_prefix == 'r'):
             traj_goal.trajectory.joint_names = self.r_joint_names
             self.r_traj_action_client.send_goal(traj_goal)
         else:
             traj_goal.trajectory.joint_names = self.l_joint_names
             self.l_traj_action_client.send_goal(traj_goal)
+        
+        if side_prefix == 'r':
+            traj_goal.trajectory.joint_names = self.r_joint_names 
+            action_client = self.r_traj_action_client
+        else:
+            traj_goal.trajectory.joint_names = self.l_joint_names 
+            action_client = self.l_traj_action_client
+        action_client.send_goal(traj_goal)
+        if wait:
+            result = 0
+            while(result < 2): # ACTIVE or PENDING
+                action_client.wait_for_result()
+                result = action_client.get_result()
 
