@@ -29,12 +29,14 @@ import os
 
 class Milestone1GUI(Plugin):
 
-    RECIEVE_FROM_HUMAN_R_POS = [0.09367691677227741, -0.01756165017492318, -0.08136022417629407, -0.1544435558844821, 6.30432982194113, -0.09030261188385946, -32.993813431756145]
-    RECIEVE_FROM_HUMAN_L_POS = [-0.11953699873627144, -0.015476264363818703, 0.05020422194221652, -0.14995566383159287, 50.24253872219175, -0.08894781979101685, 14.235824877202386]
+    RECEIVE_FROM_HUMAN_R_POS = [0.09367691677227741, -0.01756165017492318, -0.08136022417629407, -0.1544435558844821, 6.30432982194113, -0.09030261188385946, -32.993813431756145]
+    RECEIVE_FROM_HUMAN_L_POS = [-0.11953699873627144, -0.015476264363818703, 0.05020422194221652, -0.14995566383159287, 50.24253872219175, -0.08894781979101685, 14.235824877202386]
     READ_FIDUCIAL_R_POS = [0.1110873064172444, -0.09318951143030572, -0.10445131917355743, -1.400340298051122, 6.288248331768874, -0.23932066322496848, -33.10010572355945] 
     READ_FIDUCIAL_L_POS = [-0.09035386942661228, -0.09296521392749924, 0.11739289419119903, -1.4097503942910512, 50.25757896479891, -0.12453811643248647, 14.217551130760555]
     PLACE_ON_SHELF_R_POS = [0.09516923588470316, 0.029726911840466965, -0.15544415395918154, -0.14879749814052468, 6.490828830269738, -0.08351522034832204, -33.09301376958322]
     PLACE_ON_SHELF_L_POS = [-0.08952480325304246, 0.03155851288225806, 0.4005795175604179, -0.14908703956329128, 49.939015056962155, -0.08494499914185327, 14.156203553420127]
+    CARRY_BOOK_L_POS = [1.4944890279695275, 0.7734559885083256, 2.503793420227846, -1.870266027202053, -0.3108404231203695, -0.09342923856127616, 1.5860683815397023]
+    CARRY_BOOK_R_POS = [-1.1012561591939585, 1.134959582200167, -2.2679586365560622, -1.9370053251498593, 0.328957128296033, -0.09434894145312112, -1.6778230603520543]
     sound_sig = Signal(SoundRequest)
 
     def __init__(self, context):
@@ -88,6 +90,7 @@ class Milestone1GUI(Plugin):
         button_box.addItem(QtGui.QSpacerItem(15,20))
         button_box.addWidget(self.create_button('Prepare To Take', self.command_cb))
         button_box.addWidget(self.create_button('Take From Human', self.command_cb))
+        button_box.addWidget(self.create_button('Prepare To Navigate', self.command_cb))
         button_box.addWidget(self.create_button('Place On Shelf', self.command_cb))
         button_box.addStretch(1)
         large_box.addLayout(button_box)
@@ -117,10 +120,10 @@ class Milestone1GUI(Plugin):
         button_name = self._widget.sender().text()
         if (button_name == 'Prepare To Take'):
             #open gripper
-            self.saved_l_arm_pose = Milestone1GUI.RECIEVE_FROM_HUMAN_L_POS
-            self.saved_r_arm_pose = Milestone1GUI.RECIEVE_FROM_HUMAN_R_POS
-            self.move_arm('l')
-            self.move_arm('r')
+            self.saved_l_arm_pose = Milestone1GUI.RECEIVE_FROM_HUMAN_L_POS
+            self.saved_r_arm_pose = Milestone1GUI.RECEIVE_FROM_HUMAN_R_POS
+            self.move_arm('l', 2.0)  # TODO: Increase these numbers for slower movement
+            self.move_arm('r', 2.0)  # TODO: Increase these numbers for slower movement
             self.l_gripper.open_gripper()
             self.r_gripper.open_gripper(True)
         elif (button_name == 'Take From Human'):
@@ -129,32 +132,35 @@ class Milestone1GUI(Plugin):
             self.r_gripper.close_gripper(True)
             self.saved_l_arm_pose = Milestone1GUI.READ_FIDUCIAL_L_POS
             self.saved_r_arm_pose = Milestone1GUI.READ_FIDUCIAL_R_POS
-            self.move_arm('l')
-            self.move_arm('r')
+            self.move_arm('l', 2.0)  # TODO: Increase these numbers for slower movement
+            self.move_arm('r', 2.0)  # TODO: Increase these numbers for slower movement
             #TODO CALL FIDUCIAL RECOGNITION
+        elif (button_name == 'Prepare To Navigate'):
+            self.saved_l_arm_pose = Milestone1GUI.CARRY_BOOK_L_POS
+            self.saved_r_arm_pose = Milestone1GUI.CARRY_BOOK_R_POS
+            self.move_arm('l', 2.0)  # TODO: Increase these numbers for slower movement
+            self.move_arm('r', 2.0)  # TODO: Increase these numbers for slower movement
         elif (button_name == 'Place On Shelf'): 
             self.saved_l_arm_pose = Milestone1GUI.PLACE_ON_SHELF_L_POS
             self.saved_r_arm_pose = Milestone1GUI.PLACE_ON_SHELF_R_POS
-            self.move_arm('l')
-            self.move_arm('r', True)
+            self.move_arm('l', 2.0)  # TODO: Increase these numbers for slower movement
+            self.move_arm('r', 2.0, True)  # TODO: Increase these numbers for slower movement
             self.l_gripper.open_gripper()
             self.r_gripper.open_gripper(True)
     
-    def move_arm(self, side_prefix, wait = False):
+    def move_arm(self, side_prefix, time_to_joints = 2.0, wait = False):
         # forward kinematics
         if (side_prefix == 'r'):
             if self.saved_r_arm_pose is None:
                 rospy.logerr('Target pose for right arm is None, cannot move.')
             else:
                 self.freeze_arm(side_prefix)
-                time_to_joints = 2.0 
                 self.move_to_joints(side_prefix, self.saved_r_arm_pose, time_to_joints, wait)
         else: # side_prefix == 'l'
             if self.saved_l_arm_pose is None:
                 rospy.logerr('Target pose for left arm is None, cannot move.')
             else:
                 self.freeze_arm(side_prefix)
-                time_to_joints = 2.0
                 self.move_to_joints(side_prefix, self.saved_l_arm_pose, time_to_joints, wait)
                 pass
 
