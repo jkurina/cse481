@@ -143,6 +143,7 @@ class Milestone1GUI(Plugin):
             self.move_arm('r', 4.0)  # Increase these numbers for slower movement
             self.l_gripper.close_gripper()
             self.r_gripper.open_gripper(True)
+            self._sound_client.say("Please give me a book")
         elif (button_name == 'Take From Human'):
             # Close gripper and move arms to see book
             self.r_gripper.close_gripper(True)
