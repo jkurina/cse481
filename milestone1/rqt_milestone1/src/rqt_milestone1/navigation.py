@@ -8,29 +8,16 @@ import rospy
 from actionlib import SimpleActionClient
 from actionlib_msgs.msg import GoalStatus
 from geometry_msgs.msg import PoseStamped
-# TODO imports
 
-# broken :(((((
-def move_to_shelfz():
-    client = SimpleActionClient('move_base', MoveBaseAction)
-    client.wait_for_server()
-    goal = MoveBaseGoal()
-    goal.target_pose.header.frame_id = "base_link"
-    #goal.targest_pose.header.stamp = ??
-    goal.targest_pose.pose.position.x = 1.0
-    goal.targest_pose.pose.orientation.w = 1.0
-    client.send_goal(goal)
-    client.wait_for_result()
-    print ("moved!")
-
+# Navigates the PR2 to the location of the bookshelf
 def move_to_shelf():
     pub = rospy.Publisher('/move_base_simple/goal', PoseStamped)
     msg = PoseStamped()
     msg.header.frame_id = "map"
     msg.header.stamp = rospy.Time.now()
-    msg.pose.position.x = 0.380967617035
-    msg.pose.position.y = -1.6217675209
-    msg.pose.orientation.z = 0.953879350922
+    msg.pose.position.x = 0.780967617035
+    msg.pose.position.y = -1.8217675209
+    msg.pose.orientation.z = 1.353879350922
     msg.pose.orientation.w = -0.300190246152
     pub.publish(msg)
-    print("moved!")
+    rospy.loginfo("Navigated to the bookshelf")

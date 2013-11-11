@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python
 import roslib
 roslib.load_manifest('rospy')
@@ -39,16 +38,6 @@ class Gripper():
         gripper_goal.command.max_effort = 30.0
         self.gripper_client.send_goal(gripper_goal)
         if wait:
-            #this is crazy, but after talking to Mike, I think this 
-            #might be the only way
             self.gripper_client.wait_for_result()
             if not self.gripper_client.get_result().reached_goal:
                 time.sleep(9)
-            #while(True):
-            #    print 'waiting...'
-            #    self.gripper_client.wait_for_result(rospy.Duration(10.0))
-            #    time.sleep(1)
-            #    print self.gripper_client.get_result()
-            #    if self.gripper_client.get_result().reached_goal:
-            #        break
-    

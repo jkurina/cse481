@@ -5,7 +5,7 @@ roslib.load_manifest('sound_play')
 roslib.load_manifest('rospy')
 roslib.load_manifest('visualization_msgs')
 from visualization_msgs.msg import Marker
-from geometry_msgs.msg import Quaternion, Pose, Point, Vector3
+from geometry_msgs.msg import Quaternion, Pose, Point, Vector3, Twist
 from std_msgs.msg import Header, ColorRGBA
 from subprocess import call
 import rospy
@@ -25,18 +25,33 @@ from trajectory_msgs.msg import JointTrajectoryPoint
 from navigation import move_to_shelf
 from gripper import Gripper
 import os
+import time
 
 
 class Milestone1GUI(Plugin):
 
-    RECEIVE_FROM_HUMAN_R_POS = [0.09367691677227741, -0.01756165017492318, -0.08136022417629407, -0.1544435558844821, 6.30432982194113, -0.09030261188385946, -32.993813431756145]
-    RECEIVE_FROM_HUMAN_L_POS = [-0.11953699873627144, -0.015476264363818703, 0.05020422194221652, -0.14995566383159287, 50.24253872219175, -0.08894781979101685, 14.235824877202386]
-    READ_FIDUCIAL_R_POS = [0.1110873064172444, -0.09318951143030572, -0.10445131917355743, -1.400340298051122, 6.288248331768874, -0.23932066322496848, -33.10010572355945] 
-    READ_FIDUCIAL_L_POS = [-0.09035386942661228, -0.09296521392749924, 0.11739289419119903, -1.4097503942910512, 50.25757896479891, -0.12453811643248647, 14.217551130760555]
-    PLACE_ON_SHELF_R_POS = [0.09516923588470316, 0.029726911840466965, -0.15544415395918154, -0.14879749814052468, 6.490828830269738, -0.08351522034832204, -33.09301376958322]
-    PLACE_ON_SHELF_L_POS = [-0.08952480325304246, 0.03155851288225806, 0.4005795175604179, -0.14908703956329128, 49.939015056962155, -0.08494499914185327, 14.156203553420127]
-    CARRY_BOOK_L_POS = [1.4944890279695275, 0.7734559885083256, 2.503793420227846, -1.870266027202053, -0.3108404231203695, -0.09342923856127616, 1.5860683815397023]
-    CARRY_BOOK_R_POS = [-1.1012561591939585, 1.134959582200167, -2.2679586365560622, -1.9370053251498593, 0.328957128296033, -0.09434894145312112, -1.6778230603520543]
+    RECEIVE_FROM_HUMAN_R_POS = [0.00952670015493673, 0.3270780665526253,
+    0.03185028324084582, -1.3968658009779173, -3.058799671876592,
+    -1.1083678332942686, -1.6314425515258866]
+    
+    READ_FIDUCIAL_R_POS = [0.41004856860653505, 0.29772362823537935, 
+    -0.019944325676627628, -1.8394298656773618, -0.44139252862458106,
+    -0.09922194050427624, -4.761735317011306]
+    
+    NAVIGATE_R_POS = [-0.3594077470836499, 0.971353000916152, -1.9647276598906076,
+    -1.431900313132731, -1.1839177367219755, -0.09817772642188527, -1.622044624784374]
+    
+    PLACE_ON_SHELF_R_POS = [-0.15015144487461773, 0.4539704512093072,
+    -0.10846018983280459, -0.9819529421527269, -3.0207362886631235, -0.4990689162195487,
+    -1.6026396464199553]
+    
+    RELEASE_BOOK_R_POS = [-0.15545746838546493, 0.44145040258984786,
+    -0.13267376861465774, -0.972108533778647, -3.028545645401449, -0.38572817936010495,
+    0.008017066746929924]
+    
+    TUCKED_UNDER_L_POS = [0.05688828299939419, 1.2955758539090194, 1.7180547710154033,
+    -1.4511548177467404, -0.28718096455759035, -0.0938208188421713, -10.980395466225648]
+    
     sound_sig = Signal(SoundRequest)
 
     def __init__(self, context):
@@ -66,12 +81,14 @@ class Milestone1GUI(Plugin):
 
         # Create a trajectory action client
         r_traj_controller_name = '/r_arm_controller/joint_trajectory_action'
-        self.r_traj_action_client = SimpleActionClient(r_traj_controller_name, JointTrajectoryAction)
+        self.r_traj_action_client = SimpleActionClient(r_traj_controller_name,
+                JointTrajectoryAction)
         rospy.loginfo('Waiting for a response from the trajectory action server for RIGHT arm...')
         self.r_traj_action_client.wait_for_server()
         
         l_traj_controller_name = '/l_arm_controller/joint_trajectory_action'
-        self.l_traj_action_client = SimpleActionClient(l_traj_controller_name, JointTrajectoryAction)
+        self.l_traj_action_client = SimpleActionClient(l_traj_controller_name,
+                JointTrajectoryAction)
         rospy.loginfo('Waiting for a response from the trajectory action server for LEFT arm...')
         self.l_traj_action_client.wait_for_server()
 
@@ -119,35 +136,52 @@ class Milestone1GUI(Plugin):
     def command_cb(self):
         button_name = self._widget.sender().text()
         if (button_name == 'Prepare To Take'):
-            #open gripper
-            self.saved_l_arm_pose = Milestone1GUI.RECEIVE_FROM_HUMAN_L_POS
-            self.saved_r_arm_pose = Milestone1GUI.RECEIVE_FROM_HUMAN_R_POS
-            self.move_arm('l', 2.0)  # TODO: Increase these numbers for slower movement
-            self.move_arm('r', 2.0)  # TODO: Increase these numbers for slower movement
-            self.l_gripper.open_gripper()
+            # Open gripper and move arms to take book
+            self.saved_l_arm_pose = Milestone1GUI.TUCKED_UNDER_L_POS
+            self.saved_r_arm_pose = Milestone1GUI.RECEIVE_FROM_HUMAN_R_POS       
+            self.move_arm('l', 4.0)
+            self.move_arm('r', 4.0)  # Increase these numbers for slower movement
+            self.l_gripper.close_gripper()
             self.r_gripper.open_gripper(True)
         elif (button_name == 'Take From Human'):
-            #close gripper
-            self.l_gripper.close_gripper()
+            # Close gripper and move arms to see book
             self.r_gripper.close_gripper(True)
-            self.saved_l_arm_pose = Milestone1GUI.READ_FIDUCIAL_L_POS
+            self._sound_client.say("Thank you")
+            time.sleep(1)
             self.saved_r_arm_pose = Milestone1GUI.READ_FIDUCIAL_R_POS
-            self.move_arm('l', 2.0)  # TODO: Increase these numbers for slower movement
-            self.move_arm('r', 2.0)  # TODO: Increase these numbers for slower movement
-            #TODO CALL FIDUCIAL RECOGNITION
+            self.move_arm('r', 5.0)  # Increase these numbers for slower movement
         elif (button_name == 'Prepare To Navigate'):
-            self.saved_l_arm_pose = Milestone1GUI.CARRY_BOOK_L_POS
-            self.saved_r_arm_pose = Milestone1GUI.CARRY_BOOK_R_POS
-            self.move_arm('l', 2.0)  # TODO: Increase these numbers for slower movement
-            self.move_arm('r', 2.0)  # TODO: Increase these numbers for slower movement
-        elif (button_name == 'Place On Shelf'): 
-            self.saved_l_arm_pose = Milestone1GUI.PLACE_ON_SHELF_L_POS
+            # Tuck arms
+            self.saved_r_arm_pose = Milestone1GUI.NAVIGATE_R_POS
+            self.move_arm('r', 5.0)  # Increase these numbers for slower movement
+        elif (button_name == 'Place On Shelf'):
+            # Move forward, place book on the shelf, and move back
             self.saved_r_arm_pose = Milestone1GUI.PLACE_ON_SHELF_R_POS
-            self.move_arm('l', 2.0)  # TODO: Increase these numbers for slower movement
-            self.move_arm('r', 2.0, True)  # TODO: Increase these numbers for slower movement
-            self.l_gripper.open_gripper()
+            self.move_arm('r', 5.0, True)  # Increase these numbers for slower movement
+            self.move_base(True)
             self.r_gripper.open_gripper(True)
-    
+            self.saved_r_arm_pose = Milestone1GUI.RELEASE_BOOK_R_POS
+            self.move_arm('r', 2.0, True)  # Increase these numbers for slower movement
+            self.move_base(False)
+   
+    # Moves forward to the bookshelf (or backward if isForward is false)
+    def move_base(self, isForward):
+        topic_name = '/base_controller/command'
+        base_publisher = rospy.Publisher(topic_name, Twist)
+
+        distance = 7.0
+        if not isForward:
+            distance *= -1
+
+        twist_msg = Twist()
+        twist_msg.linear = Vector3(distance, 0.0, 0.0)
+        twist_msg.angular = Vector3(0.0, 0.0, 0.0)
+        for x in range(0, 15):
+            rospy.loginfo("Moving the base")
+            base_publisher.publish(twist_msg)
+            time.sleep(0.1)
+
+    # Moves arms using kinematics
     def move_arm(self, side_prefix, time_to_joints = 2.0, wait = False):
         # forward kinematics
         if (side_prefix == 'r'):
@@ -219,7 +253,8 @@ class Milestone1GUI(Plugin):
         velocities = [0] * len(positions)
         traj_goal = JointTrajectoryGoal()
         traj_goal.trajectory.header.stamp = (rospy.Time.now() + rospy.Duration(0.1))
-        traj_goal.trajectory.points.append(JointTrajectoryPoint(positions=positions, velocities=velocities, time_from_start=rospy.Duration(time_to_joint)))
+        traj_goal.trajectory.points.append(JointTrajectoryPoint(positions=positions,
+                    velocities=velocities, time_from_start=rospy.Duration(time_to_joint)))
        
         if (side_prefix == 'r'):
             traj_goal.trajectory.joint_names = self.r_joint_names
