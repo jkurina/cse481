@@ -30,7 +30,7 @@ class Gripper():
         self.change_state(0.08, wait)
 
     def close_gripper(self, wait = False):
-        self.change_state(0.01, wait)
+        self.change_state(0.0, wait)
 
     def change_state(self, value, wait):
         gripper_goal = GripperCommandGoal()
