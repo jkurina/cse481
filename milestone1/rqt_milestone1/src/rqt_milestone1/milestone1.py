@@ -139,16 +139,16 @@ class Milestone1GUI(Plugin):
             # Open gripper and move arms to take book
             self.saved_l_arm_pose = Milestone1GUI.TUCKED_UNDER_L_POS
             self.saved_r_arm_pose = Milestone1GUI.RECEIVE_FROM_HUMAN_R_POS       
-            self.move_arm('l', 4.0)
-            self.move_arm('r', 4.0)  # Increase these numbers for slower movement
+            self.move_arm('l', 5.0)
+            self.move_arm('r', 5.0)  # Increase these numbers for slower movement
             self.l_gripper.close_gripper()
             self.r_gripper.open_gripper(True)
             self._sound_client.say("Please give me a book")
         elif (button_name == 'Take From Human'):
             # Close gripper and move arms to see book
-            self.r_gripper.close_gripper(True)
+            self.r_gripper.close_gripper()
             self._sound_client.say("Thank you")
-            time.sleep(1)
+            time.sleep(3)
             self.saved_r_arm_pose = Milestone1GUI.READ_FIDUCIAL_R_POS
             self.move_arm('r', 5.0)  # Increase these numbers for slower movement
         elif (button_name == 'Prepare To Navigate'):
