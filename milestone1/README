@@ -1,1 +1,9 @@
-Code for milestone 1 of the robotics capstone goes in this directory. :D
+This directory contains team 2's code for milestone 1.
+
+1) To start up the gui, run rqt. Our gui is called Squirtle Milestone 1.
+2) To test out the navigation, run:
+a) rosrun map_server map_server basement_map.yaml in a terminal window
+b) realrobot && roslaunch pr2_navigation_global rviz_move_base.launch in another window
+c) ssh to c1 and run roslaunch pr2_2dnav pr2_2dnav.launch in another window
+Then, help the robot localize
+
