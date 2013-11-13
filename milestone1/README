@@ -7,3 +7,4 @@ b) realrobot && roslaunch pr2_navigation_global rviz_move_base.launch in another
 c) ssh to c1 and run roslaunch pr2_2dnav pr2_2dnav.launch in another window
 Then, help the robot localize
 
+All code (and maps) is in rqt_milestone1/src/rqt_milestone1
