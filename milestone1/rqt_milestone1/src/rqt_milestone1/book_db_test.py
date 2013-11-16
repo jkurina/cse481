@@ -11,4 +11,5 @@ for book in codes.keys():
     print codes.get(book).getGenre()
     print codes.get(book).getYear()
     print codes.get(book).getSummary()
+    print codes.get(book).getPositionMarker()
     print
