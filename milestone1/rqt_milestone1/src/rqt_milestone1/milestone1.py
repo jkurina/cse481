@@ -24,6 +24,7 @@ from actionlib import SimpleActionClient
 from trajectory_msgs.msg import JointTrajectoryPoint
 from navigation import move_to_shelf
 from gripper import Gripper
+from torso import Torso
 import os
 import time
 
@@ -92,6 +93,9 @@ class Milestone1GUI(Plugin):
         rospy.loginfo('Waiting for a response from the trajectory action server for LEFT arm...')
         self.l_traj_action_client.wait_for_server()
 
+        #init torso
+        self.torso = Torso()
+
         #init gripper
         self.l_gripper = Gripper('l')
         self.r_gripper = Gripper('r')
@@ -103,25 +107,49 @@ class Milestone1GUI(Plugin):
         large_box = QtGui.QVBoxLayout()
 
         #Button for outreaching to recieve book from Human
-        button_box = QtGui.QHBoxLayout()
-        button_box.addItem(QtGui.QSpacerItem(15,20))
-        button_box.addWidget(self.create_button('Prepare To Take', self.command_cb))
-        button_box.addWidget(self.create_button('Take From Human', self.command_cb))
-        button_box.addWidget(self.create_button('Prepare To Navigate', self.command_cb))
-        button_box.addWidget(self.create_button('Place On Shelf', self.command_cb))
-        button_box.addStretch(1)
-        large_box.addLayout(button_box)
+        button_box = QtGui.QVBoxLayout()
+        box_1 = QtGui.QHBoxLayout()
+        box_2 = QtGui.QHBoxLayout()
+        box_3 = QtGui.QHBoxLayout()
+        box_4 = QtGui.QHBoxLayout()
+        box_5 = QtGui.QHBoxLayout()
 
+        box_1.addItem(QtGui.QSpacerItem(15,2))
+        box_1.addWidget(self.create_button('Prepare To Take', self.command_cb))
+        box_1.addItem(QtGui.QSpacerItem(445,2))
+
+        box_2.addItem(QtGui.QSpacerItem(15,2))
+        box_2.addWidget(self.create_button('Take From Human', self.command_cb))
+        box_2.addItem(QtGui.QSpacerItem(445,2))
+
+        box_3.addItem(QtGui.QSpacerItem(15,2))
+        box_3.addWidget(self.create_button('Prepare To Navigate', self.command_cb))
+        box_3.addItem(QtGui.QSpacerItem(445,2))
 
         # Button to move to shelf
-        nav_button = self.create_button('navigate', move_to_shelf)
-        
+        box_5.addItem(QtGui.QSpacerItem(15,2))
+        box_5.addWidget(self.create_button('Navigate', move_to_shelf))
+        box_5.addItem(QtGui.QSpacerItem(445,2))
+
+        box_4.addItem(QtGui.QSpacerItem(15,2))
+        box_4.addWidget(self.create_button('Place On Shelf', self.command_cb))
+        box_4.addItem(QtGui.QSpacerItem(445,2))
+
+        button_box.addItem(QtGui.QSpacerItem(20,120))
+        button_box.addLayout(box_1)
+        button_box.addLayout(box_2)
+        button_box.addLayout(box_3)
+        button_box.addLayout(box_5)
+        button_box.addLayout(box_4)
+        button_box.addItem(QtGui.QSpacerItem(20,240))
+        large_box.addLayout(button_box)
+
         self._widget.setObjectName('Milestone1GUI')
         self._widget.setLayout(large_box)
         context.add_widget(self._widget)
         self._widget.setStyleSheet("QWidget { image: url(%s) }" %
                 (str(os.path.dirname(os.path.realpath(__file__))) +
-                "/../../rosie_background.jpg"))
+                "/../../librarian_gui_background.jpg"))
 
     def sound_cb(self, sound_request):
         qWarning('Received sound.')
@@ -137,6 +165,7 @@ class Milestone1GUI(Plugin):
         button_name = self._widget.sender().text()
         if (button_name == 'Prepare To Take'):
             # Open gripper and move arms to take book
+            self.torso.move(.1) # move torso .1 meter from base (MAX is .2)
             self.saved_l_arm_pose = Milestone1GUI.TUCKED_UNDER_L_POS
             self.saved_r_arm_pose = Milestone1GUI.RECEIVE_FROM_HUMAN_R_POS       
             self.move_arm('l', 5.0)
@@ -164,7 +193,7 @@ class Milestone1GUI(Plugin):
             self.saved_r_arm_pose = Milestone1GUI.RELEASE_BOOK_R_POS
             self.move_arm('r', 2.0, True)  # Increase these numbers for slower movement
             self.move_base(False)
-   
+  
     # Moves forward to the bookshelf (or backward if isForward is false)
     def move_base(self, isForward):
         topic_name = '/base_controller/command'
@@ -177,7 +206,7 @@ class Milestone1GUI(Plugin):
         twist_msg = Twist()
         twist_msg.linear = Vector3(distance, 0.0, 0.0)
         twist_msg.angular = Vector3(0.0, 0.0, 0.0)
-        for x in range(0, 15):
+        for x in range(0, 10):
             rospy.loginfo("Moving the base")
             base_publisher.publish(twist_msg)
             time.sleep(0.1)
