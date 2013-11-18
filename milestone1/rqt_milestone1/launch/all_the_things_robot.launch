@@ -1,0 +1,10 @@
+<launch>  
+  <include file="$(find pr2_machine)/pr2.machine" />
+
+  <!-- Navigation -->
+  <include file="$(find pr2_2dnav)/pr2_2dnav.launch" />
+  <!-- Fiducials -->
+  <include file="$(find ar_track_alvar)/launch/pr2_indiv.launch" />
+  <!-- Kinematics -->
+  <include file="$(find pr2_rviz_ik)/launch/ik_robot.launch" />
+</launch>
