@@ -25,7 +25,7 @@ from trajectory_msgs.msg import JointTrajectoryPoint
 from navigation import move_to_shelf
 from gripper import Gripper
 from torso import Torso
-from perception import listener
+from marker_perception import ReadMarkers
 import os
 import time
 
@@ -144,7 +144,7 @@ class Milestone1GUI(Plugin):
         button_box.addLayout(box_4)
         button_box.addItem(QtGui.QSpacerItem(20,240))
         large_box.addLayout(button_box)
-        listener()
+        self.marker_perception = ReadMarkers()
         self._widget.setObjectName('Milestone1GUI')
         self._widget.setLayout(large_box)
         context.add_widget(self._widget)
@@ -181,6 +181,7 @@ class Milestone1GUI(Plugin):
             time.sleep(3)
             self.saved_r_arm_pose = Milestone1GUI.READ_FIDUCIAL_R_POS
             self.move_arm('r', 5.0)  # Increase these numbers for slower movement
+            rospy.loginfo("id is: " + str(self.marker_perception.get_marker_id()))
         elif (button_name == 'Prepare To Navigate'):
             # Tuck arms
             self.saved_r_arm_pose = Milestone1GUI.NAVIGATE_R_POS
