@@ -195,6 +195,7 @@ class Milestone1GUI(Plugin):
             self.saved_r_arm_pose = Milestone1GUI.RELEASE_BOOK_R_POS
             self.move_arm('r', 2.0, True)  # Increase these numbers for slower movement
             self.move_base(False)
+            self.marker_perception.reset_marker_id()
   
     # Moves forward to the bookshelf (or backward if isForward is false)
     def move_base(self, isForward):
