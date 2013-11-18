@@ -25,6 +25,7 @@ from trajectory_msgs.msg import JointTrajectoryPoint
 from navigation import move_to_shelf
 from gripper import Gripper
 from torso import Torso
+from perception import listener
 import os
 import time
 
@@ -143,7 +144,7 @@ class Milestone1GUI(Plugin):
         button_box.addLayout(box_4)
         button_box.addItem(QtGui.QSpacerItem(20,240))
         large_box.addLayout(button_box)
-
+        listener()
         self._widget.setObjectName('Milestone1GUI')
         self._widget.setLayout(large_box)
         context.add_widget(self._widget)
