@@ -1,6 +1,6 @@
 <launch>  
   <!-- Navigation -->
-  <node name="map_server" pkg="map_server" type="map_server" args="~/catkin_ws/src/cse481/Maps/basement_map.yaml" />
+  <node name="map_server" pkg="map_server" type="map_server" args="$(find rqt_milestone1)/src/rqt_milestone1/basement_map.yaml" />
   <include file="$(find pr2_navigation_global)/rviz/rviz_move_base.launch" />
   <!-- Fiducials -->
   <include file="$(find ar_track_alvar)/launch/kinect.launch" />
