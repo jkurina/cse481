@@ -13,6 +13,7 @@ class ReadMarkers():
         def callback(data):
             if len(data.markers) is not 0:
                 self.marker_id = data.markers[0].id
+                print (str(self.marker_id))
         return callback
 
     def get_marker_id(self):

@@ -26,6 +26,8 @@ from navigation import move_to_shelf
 from gripper import Gripper
 from torso import Torso
 from marker_perception import ReadMarkers
+from book_db import BookDB
+from book import Book
 import os
 import time
 
@@ -134,6 +136,7 @@ class Milestone1GUI(Plugin):
 
         box_4.addItem(QtGui.QSpacerItem(15,2))
         box_4.addWidget(self.create_button('Place On Shelf', self.command_cb))
+        box_4.addWidget(self.create_button('Give information', self.command_cb))
         box_4.addItem(QtGui.QSpacerItem(445,2))
 
         button_box.addItem(QtGui.QSpacerItem(20,120))
@@ -145,6 +148,8 @@ class Milestone1GUI(Plugin):
         button_box.addItem(QtGui.QSpacerItem(20,240))
         large_box.addLayout(button_box)
         self.marker_perception = ReadMarkers()
+        self.book_map = BookDB().getAllBookCodes()
+        print (len(self.book_map))
         self._widget.setObjectName('Milestone1GUI')
         self._widget.setLayout(large_box)
         context.add_widget(self._widget)
@@ -196,6 +201,15 @@ class Milestone1GUI(Plugin):
             self.move_arm('r', 2.0, True)  # Increase these numbers for slower movement
             self.move_base(False)
             self.marker_perception.reset_marker_id()
+        elif (button_name == 'Give information'):
+            marker_id = self.marker_perception.get_marker_id()
+            if marker_id is not None:
+                book_info = self.book_map[unicode(marker_id)].getInformation()
+                self._sound_client.say(book_info)
+            else:
+                self._sound_client.say("I don't think I am holding a book right now")
+
+
   
     # Moves forward to the bookshelf (or backward if isForward is false)
     def move_base(self, isForward):

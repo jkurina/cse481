@@ -29,3 +29,9 @@ class Book:
 
     def getPositionMarker(self):
         return self.position_marker
+
+    def getInformation(self):
+        return ('This book is called {0}. It was published in {1}. '
+                'It is a {2} book that can be summarized as {3}').format(
+                    self.title, self.year, self.genre, self.summary)
+
