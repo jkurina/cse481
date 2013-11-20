@@ -26,6 +26,9 @@ from navigation import move_to_shelf
 from gripper import Gripper
 from torso import Torso
 from marker_perception import ReadMarkers
+from book_db import BookDB
+from book import Book
+from head import Head
 import os
 import time
 
@@ -134,6 +137,7 @@ class Milestone1GUI(Plugin):
 
         box_4.addItem(QtGui.QSpacerItem(15,2))
         box_4.addWidget(self.create_button('Place On Shelf', self.command_cb))
+        box_4.addWidget(self.create_button('Give information', self.command_cb))
         box_4.addItem(QtGui.QSpacerItem(445,2))
 
         button_box.addItem(QtGui.QSpacerItem(20,120))
@@ -145,6 +149,8 @@ class Milestone1GUI(Plugin):
         button_box.addItem(QtGui.QSpacerItem(20,240))
         large_box.addLayout(button_box)
         self.marker_perception = ReadMarkers()
+        self.book_map = BookDB().getAllBookCodes()
+        print (len(self.book_map))
         self._widget.setObjectName('Milestone1GUI')
         self._widget.setLayout(large_box)
         context.add_widget(self._widget)
@@ -176,43 +182,72 @@ class Milestone1GUI(Plugin):
             self._sound_client.say("Please give me a book")
         elif (button_name == 'Take From Human'):
             # Close gripper and move arms to see book
-            self.r_gripper.close_gripper()
+            self.r_gripper.close_gripper(True)
             self._sound_client.say("Thank you")
             time.sleep(3)
             self.saved_r_arm_pose = Milestone1GUI.READ_FIDUCIAL_R_POS
-            self.move_arm('r', 5.0)  # Increase these numbers for slower movement
-            rospy.loginfo("id is: " + str(self.marker_perception.get_marker_id()))
+            self.move_arm('r', 7.0)  # Increase these numbers for slower movement
+            rospy.loginfo("marker id is: " + str(self.marker_perception.get_marker_id()))
+            #head.tilt_head(False)
         elif (button_name == 'Prepare To Navigate'):
             # Tuck arms
             self.saved_r_arm_pose = Milestone1GUI.NAVIGATE_R_POS
             self.move_arm('r', 5.0)  # Increase these numbers for slower movement
         elif (button_name == 'Place On Shelf'):
             # Move forward, place book on the shelf, and move back
+            marker_id = self.marker_perception.get_marker_id()
+            if marker_id is None:
+                self._sound_client.say("I don't think I am holding a book "
+                        "right now")
+                rospy.logwarn("Place on shelf called when marker id is None")
+            #     return
+            book = self.book_map.get(unicode(marker_id))
+            if book is None:
+                self._sound_client.say("The book that I am holding is unknown "
+                        "to me")
+                rospy.logwarn("Place on shelf called when marker id is not in database")
+            #     return
             self.saved_r_arm_pose = Milestone1GUI.PLACE_ON_SHELF_R_POS
-            self.move_arm('r', 5.0, True)  # Increase these numbers for slower movement
+            self.move_arm('r', 4.0, True)  # Increase these numbers for slower movement
             self.move_base(True)
             self.r_gripper.open_gripper(True)
             self.saved_r_arm_pose = Milestone1GUI.RELEASE_BOOK_R_POS
             self.move_arm('r', 2.0, True)  # Increase these numbers for slower movement
             self.move_base(False)
             self.marker_perception.reset_marker_id()
+        elif (button_name == 'Give information'):
+            marker_id = self.marker_perception.get_marker_id()
+            if marker_id is not None:
+                book = self.book_map.get(unicode(marker_id))
+                if book is None:
+                    rospy.logwarn("Give information called when marker id is not in database")
+                    self._sound_client.say("The book that I am holding is unknown to me")
+                else:
+                    self._sound_client.say(book.getInformation())
+            else:
+                rospy.logwarn("Give information called when marker id is None")
+                self._sound_client.say("I don't think I am holding a book right now")
+
+
   
     # Moves forward to the bookshelf (or backward if isForward is false)
     def move_base(self, isForward):
         topic_name = '/base_controller/command'
         base_publisher = rospy.Publisher(topic_name, Twist)
 
-        distance = 7.0
+        distance = 0.25
         if not isForward:
             distance *= -1
 
         twist_msg = Twist()
         twist_msg.linear = Vector3(distance, 0.0, 0.0)
         twist_msg.angular = Vector3(0.0, 0.0, 0.0)
-        for x in range(0, 10):
+
+        for x in range(0, 15):
             rospy.loginfo("Moving the base")
             base_publisher.publish(twist_msg)
-            time.sleep(0.1)
+            time.sleep(0.15)
+        time.sleep(1.5)
 
     # Moves arms using kinematics
     def move_arm(self, side_prefix, time_to_joints = 2.0, wait = False):
@@ -304,8 +339,9 @@ class Milestone1GUI(Plugin):
             action_client = self.l_traj_action_client
         action_client.send_goal(traj_goal)
         if wait:
-            result = 0
-            while(result < 2): # ACTIVE or PENDING
-                action_client.wait_for_result()
-                result = action_client.get_result()
+            time.sleep(time_to_joint)
+            #result = 0
+            #while(result < 2): # ACTIVE or PENDING
+            #    action_client.wait_for_result()
+            #    result = action_client.get_result()
 
