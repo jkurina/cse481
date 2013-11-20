@@ -172,7 +172,7 @@ class Milestone1GUI(Plugin):
         button_name = self._widget.sender().text()
         if (button_name == 'Prepare To Take'):
             # Open gripper and move arms to take book
-            self.torso.move(.1) # move torso .1 meter from base (MAX is .2)
+            self.torso.move(.15) # move torso .1 meter from base (MAX is .2)
             self.saved_l_arm_pose = Milestone1GUI.TUCKED_UNDER_L_POS
             self.saved_r_arm_pose = Milestone1GUI.RECEIVE_FROM_HUMAN_R_POS       
             self.move_arm('l', 5.0)
