@@ -132,7 +132,7 @@ class Milestone1GUI(Plugin):
 
         # Button to move to shelf
         box_5.addItem(QtGui.QSpacerItem(15,2))
-        box_5.addWidget(self.create_button('Navigate', move_to_shelf))
+        box_5.addWidget(self.create_button('Navigate', self.command_cb))
         box_5.addItem(QtGui.QSpacerItem(445,2))
 
         box_4.addItem(QtGui.QSpacerItem(15,2))
@@ -193,20 +193,25 @@ class Milestone1GUI(Plugin):
             # Tuck arms
             self.saved_r_arm_pose = Milestone1GUI.NAVIGATE_R_POS
             self.move_arm('r', 5.0)  # Increase these numbers for slower movement
-        elif (button_name == 'Place On Shelf'):
+        elif (button_name == 'Navigate'):
             # Move forward, place book on the shelf, and move back
             marker_id = self.marker_perception.get_marker_id()
             if marker_id is None:
                 self._sound_client.say("I don't think I am holding a book "
                         "right now")
                 rospy.logwarn("Place on shelf called when marker id is None")
-            #     return
+                return
             book = self.book_map.get(unicode(marker_id))
             if book is None:
                 self._sound_client.say("The book that I am holding is unknown "
                         "to me")
                 rospy.logwarn("Place on shelf called when marker id is not in database")
-            #     return
+                return
+            x = book.getXCoordinate()
+            y = book.getYCoordinate()
+            move_to_shelf(x, y)
+        elif (button_name == 'Place On Shelf'):
+            
             self.saved_r_arm_pose = Milestone1GUI.PLACE_ON_SHELF_R_POS
             self.move_arm('r', 4.0, True)  # Increase these numbers for slower movement
             self.move_base(True)
