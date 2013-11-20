@@ -15,9 +15,16 @@ def move_to_shelf():
     msg = PoseStamped()
     msg.header.frame_id = "map"
     msg.header.stamp = rospy.Time.now()
-    msg.pose.position.x = 0.780967617035
-    msg.pose.position.y = -2.2217675209
+    msg.pose.position.x = 0.108998298645
+    msg.pose.position.y = -2.0217675209
     msg.pose.orientation.z = 1.353879350922
     msg.pose.orientation.w = -0.300190246152
     pub.publish(msg)
     rospy.loginfo("Navigated to the bookshelf")
+
+# book id 14
+#    msg.pose.position.x = 0.780967617035
+#    msg.pose.position.y = -2.0217675209
+#    msg.pose.orientation.z = 1.353879350922
+#    msg.pose.orientation.w = -0.300190246152
+
