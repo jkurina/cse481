@@ -10,7 +10,6 @@ from control_msgs.msg import PointHeadGoal
 from actionlib import SimpleActionClient
 from actionlib_msgs.msg import GoalStatus
 from geometry_msgs.msg import Point
-import waterpulse
 
 class Head():
     LEFT = 'l'
@@ -39,6 +38,8 @@ class Head():
             point = Point(1, 0, head_speed)
         elif (self.direction == Head.DOWN):  # Head.DOWN
             point = Point(1, 0, -head_speed)
+        print ("point is")
+        print (point)
         return point
 
     def create_closure(self):
@@ -61,6 +62,27 @@ class Head():
             
             self.gui.show_text_in_rviz("Head!")
         return move_head
+
+    def tilt_head(self, down=True):
+        name_space = '/head_traj_controller/point_head_action'
+
+        head_client = SimpleActionClient(name_space, PointHeadAction)
+        head_client.wait_for_server()
+
+        head_goal = PointHeadGoal()
+        head_goal.target.header.frame_id = self.get_frame()
+        head_goal.min_duration = rospy.Duration(0.3)
+        if down:
+            head_goal.target.point = Point(1, 0, Head.speed * -0.1)
+        else:
+            head_goal.target.point = Point(1, 0, Head.speed * 0.1)
+        head_goal.max_velocity = 10.0
+        head_client.send_goal(head_goal)
+        head_client.wait_for_result(rospy.Duration(2.0))
+
+        if (head_client.get_state() != GoalStatus.SUCCEEDED):
+            rospy.logwarn('Head action unsuccessful.')
+
 
     @staticmethod
     def set_speed(value):

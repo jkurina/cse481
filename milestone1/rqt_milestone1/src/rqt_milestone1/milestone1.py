@@ -187,8 +187,6 @@ class Milestone1GUI(Plugin):
             time.sleep(3)
             self.saved_r_arm_pose = Milestone1GUI.READ_FIDUCIAL_R_POS
             self.move_arm('r', 7.0)  # Increase these numbers for slower movement
-            #head = Head()
-            #head.tilt_head()
             rospy.loginfo("marker id is: " + str(self.marker_perception.get_marker_id()))
             #head.tilt_head(False)
         elif (button_name == 'Prepare To Navigate'):

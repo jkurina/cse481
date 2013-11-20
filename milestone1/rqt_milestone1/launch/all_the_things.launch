@@ -3,7 +3,7 @@
   <node name="map_server" pkg="map_server" type="map_server" args="$(find rqt_milestone1)/src/rqt_milestone1/basement_map.yaml" />
   <include file="$(find pr2_navigation_global)/rviz/rviz_move_base.launch" />
   <!-- Fiducials -->
-  <include file="$(find ar_track_alvar)/launch/kinect.launch" />
+  <!--<include file="$(find ar_track_alvar)/launch/kinect.launch" />-->
   <!-- Kinematics -->
   <!-- <include file="$(find pr2_rviz_ik)/launch/ik_desktop.launch" /> -->
 </launch>
