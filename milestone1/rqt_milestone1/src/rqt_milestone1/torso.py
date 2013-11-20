@@ -25,7 +25,7 @@ class Torso:
         
         up = SingleJointPositionGoal()
         up.position = self.position
-        #up.min_duration = Duration(2.0)
+        up.min_duration = rospy.Duration(2.0)
         up.max_velocity = 1.0
 
         self.torso_client.send_goal(up)

@@ -28,6 +28,7 @@ from torso import Torso
 from marker_perception import ReadMarkers
 from book_db import BookDB
 from book import Book
+from head import Head
 import os
 import time
 
@@ -181,20 +182,35 @@ class Milestone1GUI(Plugin):
             self._sound_client.say("Please give me a book")
         elif (button_name == 'Take From Human'):
             # Close gripper and move arms to see book
-            self.r_gripper.close_gripper()
+            self.r_gripper.close_gripper(True)
             self._sound_client.say("Thank you")
             time.sleep(3)
             self.saved_r_arm_pose = Milestone1GUI.READ_FIDUCIAL_R_POS
-            self.move_arm('r', 5.0)  # Increase these numbers for slower movement
-            rospy.loginfo("id is: " + str(self.marker_perception.get_marker_id()))
+            self.move_arm('r', 7.0)  # Increase these numbers for slower movement
+            #head = Head()
+            #head.tilt_head()
+            rospy.loginfo("marker id is: " + str(self.marker_perception.get_marker_id()))
+            #head.tilt_head(False)
         elif (button_name == 'Prepare To Navigate'):
             # Tuck arms
             self.saved_r_arm_pose = Milestone1GUI.NAVIGATE_R_POS
             self.move_arm('r', 5.0)  # Increase these numbers for slower movement
         elif (button_name == 'Place On Shelf'):
             # Move forward, place book on the shelf, and move back
+            marker_id = self.marker_perception.get_marker_id()
+            if marker_id is None:
+                self._sound_client.say("I don't think I am holding a book "
+                        "right now")
+                rospy.logwarn("Place on shelf called when marker id is None")
+            #     return
+            book = self.book_map.get(unicode(marker_id))
+            if book is None:
+                self._sound_client.say("The book that I am holding is unknown "
+                        "to me")
+                rospy.logwarn("Place on shelf called when marker id is not in database")
+            #     return
             self.saved_r_arm_pose = Milestone1GUI.PLACE_ON_SHELF_R_POS
-            self.move_arm('r', 5.0, True)  # Increase these numbers for slower movement
+            self.move_arm('r', 4.0, True)  # Increase these numbers for slower movement
             self.move_base(True)
             self.r_gripper.open_gripper(True)
             self.saved_r_arm_pose = Milestone1GUI.RELEASE_BOOK_R_POS
@@ -204,9 +220,14 @@ class Milestone1GUI(Plugin):
         elif (button_name == 'Give information'):
             marker_id = self.marker_perception.get_marker_id()
             if marker_id is not None:
-                book_info = self.book_map[unicode(marker_id)].getInformation()
-                self._sound_client.say(book_info)
+                book = self.book_map.get(unicode(marker_id))
+                if book is None:
+                    rospy.logwarn("Give information called when marker id is not in database")
+                    self._sound_client.say("The book that I am holding is unknown to me")
+                else:
+                    self._sound_client.say(book.getInformation())
             else:
+                rospy.logwarn("Give information called when marker id is None")
                 self._sound_client.say("I don't think I am holding a book right now")
 
 
@@ -216,17 +237,19 @@ class Milestone1GUI(Plugin):
         topic_name = '/base_controller/command'
         base_publisher = rospy.Publisher(topic_name, Twist)
 
-        distance = 7.0
+        distance = 0.25
         if not isForward:
             distance *= -1
 
         twist_msg = Twist()
         twist_msg.linear = Vector3(distance, 0.0, 0.0)
         twist_msg.angular = Vector3(0.0, 0.0, 0.0)
-        for x in range(0, 10):
+
+        for x in range(0, 15):
             rospy.loginfo("Moving the base")
             base_publisher.publish(twist_msg)
-            time.sleep(0.1)
+            time.sleep(0.15)
+        time.sleep(1.5)
 
     # Moves arms using kinematics
     def move_arm(self, side_prefix, time_to_joints = 2.0, wait = False):
@@ -318,8 +341,9 @@ class Milestone1GUI(Plugin):
             action_client = self.l_traj_action_client
         action_client.send_goal(traj_goal)
         if wait:
-            result = 0
-            while(result < 2): # ACTIVE or PENDING
-                action_client.wait_for_result()
-                result = action_client.get_result()
+            time.sleep(time_to_joint)
+            #result = 0
+            #while(result < 2): # ACTIVE or PENDING
+            #    action_client.wait_for_result()
+            #    result = action_client.get_result()
 
