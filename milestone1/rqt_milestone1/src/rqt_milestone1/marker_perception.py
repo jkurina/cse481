@@ -6,7 +6,7 @@ from ar_track_alvar.msg import AlvarMarkers
 
 class ReadMarkers():
     def __init__(self, is_listening = True):
-        self.marker_id = 11
+        self.marker_id = None
         self.is_listening = is_listening
         rospy.Subscriber("ar_pose_marker", AlvarMarkers, self.create_closure())
 
@@ -21,7 +21,7 @@ class ReadMarkers():
         return callback
 
     def get_marker_id(self):
-        return 14
+        return self.marker_id
 
     def reset_marker_id(self):
         self.marker_id = None        
