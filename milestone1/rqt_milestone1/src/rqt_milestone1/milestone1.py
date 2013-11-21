@@ -181,15 +181,17 @@ class Milestone1GUI(Plugin):
             self.r_gripper.open_gripper(True)
             self._sound_client.say("Please give me a book")
         elif (button_name == 'Take From Human'):
+            self.marker_perception.is_listening = True
             # Close gripper and move arms to see book
             self.r_gripper.close_gripper(True)
             self._sound_client.say("Thank you")
-            time.sleep(3)
+            time.sleep(1)
             self.saved_r_arm_pose = Milestone1GUI.READ_FIDUCIAL_R_POS
-            self.move_arm('r', 7.0)  # Increase these numbers for slower movement
+            self.move_arm('r', 5.0)  # Increase these numbers for slower movement
             rospy.loginfo("marker id is: " + str(self.marker_perception.get_marker_id()))
             #head.tilt_head(False)
         elif (button_name == 'Prepare To Navigate'):
+            self.marker_perception.is_listening = False
             # Tuck arms
             self.saved_r_arm_pose = Milestone1GUI.NAVIGATE_R_POS
             self.move_arm('r', 5.0)  # Increase these numbers for slower movement

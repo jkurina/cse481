@@ -40,4 +40,4 @@ class Gripper():
         if wait:
             self.gripper_client.wait_for_result()
             if not self.gripper_client.get_result().reached_goal:
-                time.sleep(3)
+                time.sleep(1)
