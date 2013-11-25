@@ -202,13 +202,13 @@ class Milestone1GUI(Plugin):
                 self._sound_client.say("I don't think I am holding a book "
                         "right now")
                 rospy.logwarn("Place on shelf called when marker id is None")
-                return
+            #    return
             book = self.book_map.get(unicode(marker_id))
             if book is None:
                 self._sound_client.say("The book that I am holding is unknown "
                         "to me")
                 rospy.logwarn("Place on shelf called when marker id is not in database")
-                return
+            #    return
             x = book.getXCoordinate()
             y = book.getYCoordinate()
             move_to_shelf(x, y)
