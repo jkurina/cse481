@@ -5,27 +5,17 @@ roslib.load_manifest('actionlib_msgs')
 roslib.load_manifest('control_msgs')
 import numpy
 import rospy
+import actionlib
 from actionlib import SimpleActionClient
 from actionlib_msgs.msg import GoalStatus
 from geometry_msgs.msg import PoseStamped
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 
-# Navigates the PR2 to the location of the bookshelf
-def move_to_shelfz(x, y):
-    pub = rospy.Publisher('/move_base_simple/goal', PoseStamped)
-    msg = PoseStamped()
-    msg.header.frame_id = "map"
-    msg.header.stamp = rospy.Time.now()
-    msg.pose.position.x = x
-    msg.pose.position.y = y
-    msg.pose.orientation.z = 1.353879350922
-    msg.pose.orientation.w = -0.300190246152
-    pub.publish(msg)
-    rospy.loginfo("Navigated to " + str(x) + ", " + str(y))
-
+# Navigates the PR2 to the location passed in
 def move_to_shelf(x, y):
     client = actionlib.SimpleActionClient('move_base', MoveBaseAction)
     client.wait_for_server()
+    
     goal = MoveBaseGoal()
     goal.target_pose.header.frame_id = "map"
     goal.target_pose.header.stamp = rospy.Time.now()
@@ -33,13 +23,12 @@ def move_to_shelf(x, y):
     goal.target_pose.pose.position.y = y
     goal.target_pose.pose.orientation.z = 1.353879350922
     goal.target_pose.pose.orientation.w = -0.300190246152
+    
+    # Send the goal to the action server
     client.send_goal(goal)
-    client.wait_for_result()
-    return client.get_result()
+    rospy.loginfo("Sending navgoal to " str(x) + ", " + str(y))
 
-# book id 14
-#    msg.pose.position.x = 0.780967617035
-#    msg.pose.position.y = -2.0217675209
-#    msg.pose.orientation.z = 1.353879350922
-#    msg.pose.orientation.w = -0.300190246152
+    # Wait for the robot to navigate to the specified location
+    client.wait_for_result()
+
 

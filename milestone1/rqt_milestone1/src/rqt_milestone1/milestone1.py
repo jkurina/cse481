@@ -189,7 +189,6 @@ class Milestone1GUI(Plugin):
             self.saved_r_arm_pose = Milestone1GUI.READ_FIDUCIAL_R_POS
             self.move_arm('r', 5.0)  # Increase these numbers for slower movement
             rospy.loginfo("marker id is: " + str(self.marker_perception.get_marker_id()))
-            #head.tilt_head(False)
         elif (button_name == 'Prepare To Navigate'):
             self.marker_perception.is_listening = False
             # Tuck arms
@@ -202,13 +201,13 @@ class Milestone1GUI(Plugin):
                 self._sound_client.say("I don't think I am holding a book "
                         "right now")
                 rospy.logwarn("Place on shelf called when marker id is None")
-            #    return
+                return
             book = self.book_map.get(unicode(marker_id))
             if book is None:
                 self._sound_client.say("The book that I am holding is unknown "
                         "to me")
                 rospy.logwarn("Place on shelf called when marker id is not in database")
-            #    return
+                return
             x = book.getXCoordinate()
             y = book.getYCoordinate()
             move_to_shelf(x, y)
