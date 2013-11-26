@@ -30,6 +30,11 @@ def move_to_shelf(x, y):
 
     # Wait for the robot to navigate to the specified location
     client.wait_for_result()
-    rospy.loginfo("PR2 finished navigating")
+    
+    # Check if the navigation was successful
+    if (client.get_state() != GOalStatus.SUCCEEDED):
+        rospy.loginfo("PR2's navigation was unsuccessful")
+    else:
+        rospy.loginfo("PR2 navigated successfully")
 
 
