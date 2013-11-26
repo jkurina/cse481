@@ -188,7 +188,8 @@ class Milestone1GUI(Plugin):
             time.sleep(1)
             self.saved_r_arm_pose = Milestone1GUI.READ_FIDUCIAL_R_POS
             self.move_arm('r', 5.0)  # Increase these numbers for slower movement
-            rospy.loginfo("marker id is: " + str(self.marker_perception.get_marker_id()))
+            rospy.loginfo("marker id returned by get_marker_id is: " + 
+                         str(self.marker_perception.get_marker_id()))
         elif (button_name == 'Prepare To Navigate'):
             self.marker_perception.is_listening = False
             # Tuck arms
@@ -197,6 +198,7 @@ class Milestone1GUI(Plugin):
         elif (button_name == 'Navigate'):
             # Move forward, place book on the shelf, and move back
             marker_id = self.marker_perception.get_marker_id()
+            rospy.loginfo("marker id returned by get_marker_id is: " + str(marker_id))
             if marker_id is None:
                 self._sound_client.say("I don't think I am holding a book "
                         "right now")
@@ -223,6 +225,7 @@ class Milestone1GUI(Plugin):
             self.marker_perception.reset_marker_id()
         elif (button_name == 'Give information'):
             marker_id = self.marker_perception.get_marker_id()
+            rospy.loginfo("marker id returned by get_marker_id is: " + str(marker_id))
             if marker_id is not None:
                 book = self.book_map.get(unicode(marker_id))
                 if book is None:
