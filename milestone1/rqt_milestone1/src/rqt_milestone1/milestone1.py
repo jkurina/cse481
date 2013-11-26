@@ -119,25 +119,25 @@ class Milestone1GUI(Plugin):
         box_5 = QtGui.QHBoxLayout()
 
         box_1.addItem(QtGui.QSpacerItem(15,2))
-        box_1.addWidget(self.create_button('Prepare To Take', self.command_cb))
+        box_1.addWidget(self.create_button('Prepare To Take', self.prepare_to_take))
         box_1.addItem(QtGui.QSpacerItem(445,2))
 
         box_2.addItem(QtGui.QSpacerItem(15,2))
-        box_2.addWidget(self.create_button('Take From Human', self.command_cb))
+        box_2.addWidget(self.create_button('Take From Human', self.take_from_human))
         box_2.addItem(QtGui.QSpacerItem(445,2))
 
         box_3.addItem(QtGui.QSpacerItem(15,2))
-        box_3.addWidget(self.create_button('Prepare To Navigate', self.command_cb))
+        box_3.addWidget(self.create_button('Prepare To Navigate', self.prepare_to_navigate))
         box_3.addItem(QtGui.QSpacerItem(445,2))
 
         # Button to move to shelf
         box_5.addItem(QtGui.QSpacerItem(15,2))
-        box_5.addWidget(self.create_button('Navigate', self.command_cb))
+        box_5.addWidget(self.create_button('Navigate', self.navigate))
         box_5.addItem(QtGui.QSpacerItem(445,2))
 
         box_4.addItem(QtGui.QSpacerItem(15,2))
-        box_4.addWidget(self.create_button('Place On Shelf', self.command_cb))
-        box_4.addWidget(self.create_button('Give information', self.command_cb))
+        box_4.addWidget(self.create_button('Place On Shelf', self.place_on_shelf))
+        box_4.addWidget(self.create_button('Give information', self.give_information))
         box_4.addItem(QtGui.QSpacerItem(445,2))
 
         button_box.addItem(QtGui.QSpacerItem(20,120))
@@ -168,76 +168,77 @@ class Milestone1GUI(Plugin):
         btn.setAutoRepeat(True)
         return btn
 
-    def command_cb(self):
-        button_name = self._widget.sender().text()
-        if (button_name == 'Prepare To Take'):
-            # Open gripper and move arms to take book
-            self.torso.move(.15) # move torso .1 meter from base (MAX is .2)
-            self.saved_l_arm_pose = Milestone1GUI.TUCKED_UNDER_L_POS
-            self.saved_r_arm_pose = Milestone1GUI.RECEIVE_FROM_HUMAN_R_POS       
-            self.move_arm('l', 5.0)
-            self.move_arm('r', 5.0)  # Increase these numbers for slower movement
-            self.l_gripper.close_gripper()
-            self.r_gripper.open_gripper(True)
-            self._sound_client.say("Please give me a book")
-        elif (button_name == 'Take From Human'):
-            self.marker_perception.is_listening = True
-            # Close gripper and move arms to see book
-            self.r_gripper.close_gripper(True)
-            self._sound_client.say("Thank you")
-            time.sleep(1)
-            self.saved_r_arm_pose = Milestone1GUI.READ_FIDUCIAL_R_POS
-            self.move_arm('r', 5.0)  # Increase these numbers for slower movement
-            rospy.loginfo("marker id returned by get_marker_id is: " + 
-                         str(self.marker_perception.get_marker_id()))
-        elif (button_name == 'Prepare To Navigate'):
-            self.marker_perception.is_listening = False
-            # Tuck arms
-            self.saved_r_arm_pose = Milestone1GUI.NAVIGATE_R_POS
-            self.move_arm('r', 5.0)  # Increase these numbers for slower movement
-        elif (button_name == 'Navigate'):
-            # Move forward, place book on the shelf, and move back
-            marker_id = self.marker_perception.get_marker_id()
-            rospy.loginfo("marker id returned by get_marker_id is: " + str(marker_id))
-            if marker_id is None:
-                self._sound_client.say("I don't think I am holding a book "
-                        "right now")
-                rospy.logwarn("Place on shelf called when marker id is None")
-                return
+    def prepare_to_take(self):
+        # Open gripper and move arms to take book
+        self.torso.move(.15) # move torso .1 meter from base (MAX is .2)
+        self.saved_l_arm_pose = Milestone1GUI.TUCKED_UNDER_L_POS
+        self.saved_r_arm_pose = Milestone1GUI.RECEIVE_FROM_HUMAN_R_POS       
+        self.move_arm('l', 5.0)
+        self.move_arm('r', 5.0)  # Increase these numbers for slower movement
+        self.l_gripper.close_gripper()
+        self.r_gripper.open_gripper(True)
+        self._sound_client.say("Please give me a book")
+
+    def take_from_human(self):
+        self.marker_perception.is_listening = True
+        # Close gripper and move arms to see book
+        self.r_gripper.close_gripper(True)
+        self._sound_client.say("Thank you")
+        time.sleep(1)
+        self.saved_r_arm_pose = Milestone1GUI.READ_FIDUCIAL_R_POS
+        self.move_arm('r', 5.0)  # Increase these numbers for slower movement
+        rospy.loginfo("marker id returned by get_marker_id is: " + 
+		 str(self.marker_perception.get_marker_id()))
+
+    def prepare_to_navigate(self):
+        self.marker_perception.is_listening = False
+        # Tuck arms
+        self.saved_r_arm_pose = Milestone1GUI.NAVIGATE_R_POS
+        self.move_arm('r', 5.0)  # Increase these numbers for slower movement
+
+    def navigate(self):
+        # Move forward, place book on the shelf, and move back
+        marker_id = self.marker_perception.get_marker_id()
+        rospy.loginfo("marker id returned by get_marker_id is: " + str(marker_id))
+        if marker_id is None:
+	    self._sound_client.say("I don't think I am holding a book "
+		    "right now")
+	    rospy.logwarn("Navigate called when marker id is None")
+	    return
+        
+        book = self.book_map.get(unicode(marker_id))
+        if book is None:
+	    self._sound_client.say("The book that I am holding is unknown "
+		    "to me")
+	    rospy.logwarn("Navigate called when marker id is not in database")
+	    return
+        x = book.getXCoordinate()
+        y = book.getYCoordinate()
+        move_to_shelf(x, y)
+
+    def place_on_shelf(self):
+	self.saved_r_arm_pose = Milestone1GUI.PLACE_ON_SHELF_R_POS
+	self.move_arm('r', 4.0, True)  # Increase these numbers for slower movement
+	self.move_base(True)
+	self.r_gripper.open_gripper(True)
+	self.saved_r_arm_pose = Milestone1GUI.RELEASE_BOOK_R_POS
+	self.move_arm('r', 2.0, True)  # Increase these numbers for slower movement
+	self.move_base(False)
+	self.marker_perception.reset_marker_id()
+
+    def give_information(self):
+        marker_id = self.marker_perception.get_marker_id()
+        rospy.loginfo("marker id returned by get_marker_id is: " + str(marker_id))
+        if marker_id is not None:
             book = self.book_map.get(unicode(marker_id))
             if book is None:
-                self._sound_client.say("The book that I am holding is unknown "
-                        "to me")
-                rospy.logwarn("Place on shelf called when marker id is not in database")
-                return
-            x = book.getXCoordinate()
-            y = book.getYCoordinate()
-            move_to_shelf(x, y)
-        elif (button_name == 'Place On Shelf'):
-            
-            self.saved_r_arm_pose = Milestone1GUI.PLACE_ON_SHELF_R_POS
-            self.move_arm('r', 4.0, True)  # Increase these numbers for slower movement
-            self.move_base(True)
-            self.r_gripper.open_gripper(True)
-            self.saved_r_arm_pose = Milestone1GUI.RELEASE_BOOK_R_POS
-            self.move_arm('r', 2.0, True)  # Increase these numbers for slower movement
-            self.move_base(False)
-            self.marker_perception.reset_marker_id()
-        elif (button_name == 'Give information'):
-            marker_id = self.marker_perception.get_marker_id()
-            rospy.loginfo("marker id returned by get_marker_id is: " + str(marker_id))
-            if marker_id is not None:
-                book = self.book_map.get(unicode(marker_id))
-                if book is None:
-                    rospy.logwarn("Give information called when marker id is not in database")
-                    self._sound_client.say("The book that I am holding is unknown to me")
-                else:
-                    self._sound_client.say(book.getInformation())
+                rospy.logwarn("Give information called when marker id is not in database")
+                self._sound_client.say("The book that I am holding is unknown to me")
             else:
-                rospy.logwarn("Give information called when marker id is None")
-                self._sound_client.say("I don't think I am holding a book right now")
-
-
+                self._sound_client.say(book.getInformation())
+        else:
+            rospy.logwarn("Give information called when marker id is None")
+            self._sound_client.say("I don't think I am holding a book right now")
   
     # Moves forward to the bookshelf (or backward if isForward is false)
     def move_base(self, isForward):
