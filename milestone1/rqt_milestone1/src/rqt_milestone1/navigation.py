@@ -30,5 +30,6 @@ def move_to_shelf(x, y):
 
     # Wait for the robot to navigate to the specified location
     client.wait_for_result()
+    rospy.loginfo("PR2 finished navigating")
 
 
