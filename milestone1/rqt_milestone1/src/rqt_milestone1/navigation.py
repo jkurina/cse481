@@ -26,7 +26,7 @@ def move_to_shelf(x, y):
     
     # Send the goal to the action server
     client.send_goal(goal)
-    rospy.loginfo("Sending navgoal to " str(x) + ", " + str(y))
+    rospy.loginfo("Sending navgoal to " + str(x) + ", " + str(y))
 
     # Wait for the robot to navigate to the specified location
     client.wait_for_result()
