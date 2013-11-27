@@ -120,6 +120,7 @@ class Milestone1GUI(Plugin):
         box_3 = QtGui.QHBoxLayout()
         box_4 = QtGui.QHBoxLayout()
         box_5 = QtGui.QHBoxLayout()
+        box_6 = QtGui.QHBoxLayout()
 
         box_1.addItem(QtGui.QSpacerItem(15,2))
         box_1.addWidget(self.create_button('Prepare To Take', self.prepare_to_take))
@@ -140,8 +141,11 @@ class Milestone1GUI(Plugin):
 
         box_4.addItem(QtGui.QSpacerItem(15,2))
         box_4.addWidget(self.create_button('Place On Shelf', self.place_on_shelf))
-        box_4.addWidget(self.create_button('Give information', self.give_information))
         box_4.addItem(QtGui.QSpacerItem(445,2))
+
+        box_6.addItem(QtGui.QSpacerItem(15,2))
+        box_6.addWidget(self.create_button('Give information', self.give_information))
+        box_6.addItem(QtGui.QSpacerItem(445,2))
 
         button_box.addItem(QtGui.QSpacerItem(20,120))
         button_box.addLayout(box_1)
@@ -257,17 +261,24 @@ class Milestone1GUI(Plugin):
 	    self.pick_up_from_shelf()  # Pick up from the shelf 
 	    self.prepare_to_navigate()
 	    # Set marker_id to help desk location
-	    self.navigate()  # Navigate to designated help desk location
+	    self.navigate_to_person()  # Navigate to designated help desk location
 	    self.give_book()  # Give Book to Human 
 
-    def pick_up_from_shelf():
+    def pick_up_from_shelf(self):
 	self.saved_r_arm_pose = Milestone1GUI.RETRIEVE_FROM_SHELF_R_POS
 	self.move_arm('r', 4.0, True)  # Increase these numbers for slower movement
 	self.move_base(True)
 	self.r_gripper.open_gripper(False)
 	self.move_base(False)
 
-    def give_book():
+    def navigate_to_person(self):
+        x = 2.82690143585
+        y = -0.416650295258
+        z = 0.252587109056
+        w = 0.967574158573
+        self.navigation.move_to_shelf(x, y, z, w)
+    
+    def give_book(self):
 	self.saved_r_arm_pose = Milestone1GUI.RECIEVE_FROM_HUMAN_R_POS
 	self.move_arm('r', 4.0, True)
 	self.r_gripper.open_gripper(True)

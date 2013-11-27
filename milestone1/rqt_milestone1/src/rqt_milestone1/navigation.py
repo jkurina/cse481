@@ -17,20 +17,20 @@ class Navigation():
 	    self.client.wait_for_server()
 
 	# Navigates the PR2 to the location passed in
-	def move_to_shelf(self, x, y):
+	def move_to_shelf(self, x, y, z=0.990642343157, w=-0.136483507958):
 	    goal = MoveBaseGoal()
 	    goal.target_pose.header.frame_id = "map"
 	    goal.target_pose.header.stamp = rospy.Time.now()
-	    x = 1.54238247871
-            y = -1.83420526981
-            goal.target_pose.pose.position.x = x
+	    goal.target_pose.pose.position.x = x
 	    goal.target_pose.pose.position.y = y
-	    goal.target_pose.pose.orientation.z = 0.990642343157
-	    goal.target_pose.pose.orientation.w = -0.136483507958
+	    goal.target_pose.pose.orientation.z = z
+	    goal.target_pose.pose.orientation.w = w
 #middle book: 
 #    x: 0.905410051346
 #    y: -2.0606584549
-
+# first book
+#    x = 1.54238247871
+#    y = -1.83420526981
 
 	    # Send the goal to the action server
 	    self.client.send_goal(goal)
