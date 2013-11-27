@@ -237,13 +237,13 @@ class Milestone1GUI(Plugin):
 
     def place_on_shelf(self):
         self.saved_r_arm_pose = Milestone1GUI.PLACE_ON_SHELF_R_POS
-	    self.move_arm('r', 4.0, True)  # Increase these numbers for slower movement
-	    self.move_base(True)
-	    self.r_gripper.open_gripper(True)
-	    self.saved_r_arm_pose = Milestone1GUI.RELEASE_BOOK_R_POS
-	    self.move_arm('r', 2.0, True)  # Increase these numbers for slower movement
-	    self.move_base(False)
-	    self.marker_perception.reset_marker_id()
+	self.move_arm('r', 4.0, True)  # Increase these numbers for slower movement
+	self.move_base(True)
+	self.r_gripper.open_gripper(True)
+	self.saved_r_arm_pose = Milestone1GUI.RELEASE_BOOK_R_POS
+	self.move_arm('r', 2.0, True)  # Increase these numbers for slower movement
+	self.move_base(False)
+	self.marker_perception.reset_marker_id()
 
     def give_information(self):
         marker_id = self.marker_perception.get_marker_id()
@@ -261,28 +261,30 @@ class Milestone1GUI(Plugin):
     
     def pick_up_from_shelf_routine(self, book_title = "Snow Crash"):
 	    book_id = self.bookDB.getBookIdByTitle(book_title)
-	    if book_id is None:
+	    book_id = 2
+            if book_id is None:
 	        rospy.logwarn("Book asked for was not present in database")
 	        self._sound_client.say("The book you requested is not present in the database.")
 	    else:
-            self.torso.move(.15) # move torso .1 meter from base (MAX is .2)
-            self.saved_l_arm_pose = Milestone1GUI.TUCKED_UNDER_L_POS
-            self.move_arm('l', 5.0)
-            self.l_gripper.close_gripper()
+                self.torso.move(.15) # move torso .1 meter from base (MAX is .2)
+                self.saved_l_arm_pose = Milestone1GUI.TUCKED_UNDER_L_POS
+                self.move_arm('l', 5.0)
+                self.l_gripper.close_gripper()
 	        self.marker_perception.set_marker_id(book_id)
 	        self.prepare_to_navigate() 
 	        self.navigate_to_shelf()  # Navigate to book location
 	        self.pick_up_from_shelf()  # Pick up from the shelf 
 	        self.prepare_to_navigate()
-	        self.navigate_to_person()  # Navigate to designated help desk location
+	        time.sleep(5)
+                self.navigate_to_person()  # Navigate to designated help desk location
 	        self.give_book()  # Give Book to Human 
 
     def pick_up_from_shelf(self):
 	    self.saved_r_arm_pose = Milestone1GUI.PLACE_ON_SHELF_R_POS
 	    self.move_arm('r', 4.0, True)  # Increase these numbers for slower movement
 	    self.r_gripper.open_gripper(True)
-        self.move_base(True)
-	    self.r_gripper.open_gripper(False)
+            self.move_base(True)
+	    self.r_gripper.close_gripper(True)
 	    self.move_base(False)
 
     def navigate_to_person(self):
@@ -293,7 +295,7 @@ class Milestone1GUI(Plugin):
         self.navigation.move_to_shelf(x, y, z, w)
     
     def give_book(self):
-	    self.saved_r_arm_pose = Milestone1GUI.RECIEVE_FROM_HUMAN_R_POS
+	    self.saved_r_arm_pose = Milestone1GUI.RECEIVE_FROM_HUMAN_R_POS
 	    self.move_arm('r', 4.0, True)
 	    self.r_gripper.open_gripper(True)
 	
