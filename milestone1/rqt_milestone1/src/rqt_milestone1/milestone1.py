@@ -49,6 +49,10 @@ class Milestone1GUI(Plugin):
     PLACE_ON_SHELF_R_POS = [-0.15015144487461773, 0.4539704512093072,
     -0.10846018983280459, -0.9819529421527269, -3.0207362886631235, -0.4990689162195487,
     -1.6026396464199553]
+
+    LOWER_ON_SHELF_R_POS = [-0.2159792990560645, 0.6221451583409631,
+    -0.1886376030177479, -0.959223940465513, 9.690004126983537, -0.2866303982732683,
+    111.39703078836274]
     
     RELEASE_BOOK_R_POS = [-0.15545746838546493, 0.44145040258984786,
     -0.13267376861465774, -0.972108533778647, -3.028545645401449, -0.38572817936010495,
@@ -168,7 +172,7 @@ class Milestone1GUI(Plugin):
         large_box.addLayout(button_box)
         self.marker_perception = ReadMarkers()
         self.bookDB = BookDB()
-	self.book_map = self.bookDB.getAllBookCodes()
+        self.book_map = self.bookDB.getAllBookCodes()
         print (len(self.book_map))
         self._widget.setObjectName('Milestone1GUI')
         self._widget.setLayout(large_box)
@@ -207,7 +211,7 @@ class Milestone1GUI(Plugin):
         self.saved_r_arm_pose = Milestone1GUI.READ_FIDUCIAL_R_POS
         self.move_arm('r', 5.0)  # Increase these numbers for slower movement
         rospy.loginfo("marker id returned by get_marker_id is: " + 
-		 str(self.marker_perception.get_marker_id()))
+                 str(self.marker_perception.get_marker_id()))
 
     def prepare_to_navigate(self):
         self.marker_perception.is_listening = False
@@ -220,30 +224,41 @@ class Milestone1GUI(Plugin):
         marker_id = self.marker_perception.get_marker_id()
         rospy.loginfo("marker id returned by get_marker_id is: " + str(marker_id))
         if marker_id is None:
-	    self._sound_client.say("I don't think I am holding a book "
-		    "right now")
-	    rospy.logwarn("Navigate to shelf called when marker id is None")
-	    return
+            self._sound_client.say("I don't think I am holding a book "
+                    "right now")
+            rospy.logwarn("Navigate to shelf called when marker id is None")
+            return
         
         book = self.book_map.get(unicode(marker_id))
         if book is None:
-	    self._sound_client.say("The book that I am holding is unknown "
-		    "to me")
-	    rospy.logwarn("Navigate to shelf called when marker id is not in database")
-	    return
+            self._sound_client.say("The book that I am holding is unknown "
+                    "to me")
+            rospy.logwarn("Navigate to shelf called when marker id is not in database")
+            return
         x = book.getXCoordinate()
         y = book.getYCoordinate()
         self.navigation.move_to_shelf(x, y)
 
+    # Ye Olde Dropping way of putting a book on the shelf. Deprecating.
+    def drop_on_shelf(self):
+        self.saved_r_arm_pose = Milestone1GUI.PLACE_ON_SHELF_R_POS
+        self.move_arm('r', 4.0, True)  # Increase these numbers for slower movement
+        self.move_base(True)
+        self.r_gripper.open_gripper(True)
+        self.saved_r_arm_pose = Milestone1GUI.RELEASE_BOOK_R_POS
+        self.move_arm('r', 2.0, True)  # Increase these numbers for slower movement
+        self.move_base(False)
+        self.marker_perception.reset_marker_id()
+
     def place_on_shelf(self):
         self.saved_r_arm_pose = Milestone1GUI.PLACE_ON_SHELF_R_POS
-	self.move_arm('r', 4.0, True)  # Increase these numbers for slower movement
-	self.move_base(True)
-	self.r_gripper.open_gripper(True)
-	self.saved_r_arm_pose = Milestone1GUI.RELEASE_BOOK_R_POS
-	self.move_arm('r', 2.0, True)  # Increase these numbers for slower movement
-	self.move_base(False)
-	self.marker_perception.reset_marker_id()
+        self.move_arm('r', 4.0, True)  # Increase these numbers for slower movement
+        self.move_base(True)
+        self.saved_r_arm_pose = Milestone1GUI.LOWER_ON_SHELF_R_POS
+        self.move_arm('r', 2.0, True)  # Increase these numbers for slower movement
+        self.r_gripper.open_gripper(True)
+        self.move_base(False)
+        self.marker_perception.reset_marker_id()
 
     def give_information(self):
         marker_id = self.marker_perception.get_marker_id()
@@ -260,32 +275,32 @@ class Milestone1GUI(Plugin):
             self._sound_client.say("I don't think I am holding a book right now")
     
     def pick_up_from_shelf_routine(self, book_title = "Snow Crash"):
-	    book_id = self.bookDB.getBookIdByTitle(book_title)
-	    book_id = 2
-            if book_id is None:
-	        rospy.logwarn("Book asked for was not present in database")
-	        self._sound_client.say("The book you requested is not present in the database.")
-	    else:
-                self.torso.move(.15) # move torso .1 meter from base (MAX is .2)
-                self.saved_l_arm_pose = Milestone1GUI.TUCKED_UNDER_L_POS
-                self.move_arm('l', 5.0)
-                self.l_gripper.close_gripper()
-	        self.marker_perception.set_marker_id(book_id)
-	        self.prepare_to_navigate() 
-	        self.navigate_to_shelf()  # Navigate to book location
-	        self.pick_up_from_shelf()  # Pick up from the shelf 
-	        self.prepare_to_navigate()
-	        time.sleep(5)
-                self.navigate_to_person()  # Navigate to designated help desk location
-	        self.give_book()  # Give Book to Human 
+        book_id = self.bookDB.getBookIdByTitle(book_title)
+        book_id = 2
+        if book_id is None:
+            rospy.logwarn("Book asked for was not present in database")
+            self._sound_client.say("The book you requested is not present in the database.")
+        else:
+            self.torso.move(.15) # move torso .1 meter from base (MAX is .2)
+            self.saved_l_arm_pose = Milestone1GUI.TUCKED_UNDER_L_POS
+            self.move_arm('l', 5.0)
+            self.l_gripper.close_gripper()
+            self.marker_perception.set_marker_id(book_id)
+            self.prepare_to_navigate() 
+            self.navigate_to_shelf()  # Navigate to book location
+            self.pick_up_from_shelf()  # Pick up from the shelf 
+            self.prepare_to_navigate()
+            time.sleep(5)
+            self.navigate_to_person()  # Navigate to designated help desk location
+            self.give_book()  # Give Book to Human 
 
     def pick_up_from_shelf(self):
-	    self.saved_r_arm_pose = Milestone1GUI.PLACE_ON_SHELF_R_POS
-	    self.move_arm('r', 4.0, True)  # Increase these numbers for slower movement
-	    self.r_gripper.open_gripper(True)
-            self.move_base(True)
-	    self.r_gripper.close_gripper(True)
-	    self.move_base(False)
+        self.saved_r_arm_pose = Milestone1GUI.LOWER_ON_SHELF_R_POS
+        self.move_arm('r', 4.0, True)  # Increase these numbers for slower movement
+        self.r_gripper.open_gripper(True)
+        self.move_base(True)
+        self.r_gripper.close_gripper(True)
+        self.move_base(False)
 
     def navigate_to_person(self):
         x = 2.82690143585
@@ -295,10 +310,10 @@ class Milestone1GUI(Plugin):
         self.navigation.move_to_shelf(x, y, z, w)
     
     def give_book(self):
-	    self.saved_r_arm_pose = Milestone1GUI.RECEIVE_FROM_HUMAN_R_POS
-	    self.move_arm('r', 4.0, True)
-	    self.r_gripper.open_gripper(True)
-	
+        self.saved_r_arm_pose = Milestone1GUI.RECEIVE_FROM_HUMAN_R_POS
+        self.move_arm('r', 4.0, True)
+        self.r_gripper.open_gripper(True)
+        
     # Moves forward to the bookshelf (or backward if isForward is false)
     def move_base(self, isForward):
         topic_name = '/base_controller/command'
