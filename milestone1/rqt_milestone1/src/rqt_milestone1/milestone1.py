@@ -22,7 +22,7 @@ from control_msgs.msg import JointTrajectoryAction
 from sensor_msgs.msg import JointState
 from actionlib import SimpleActionClient
 from trajectory_msgs.msg import JointTrajectoryPoint
-from navigation import move_to_shelf
+from navigation import Navigation
 from gripper import Gripper
 from torso import Torso
 from marker_perception import ReadMarkers
@@ -103,6 +103,9 @@ class Milestone1GUI(Plugin):
         #init gripper
         self.l_gripper = Gripper('l')
         self.r_gripper = Gripper('r')
+
+        #init navigation
+        self.navigation = Navigation()
 
         self._widget = QWidget()
         self._widget.setFixedSize(600, 600)
@@ -214,7 +217,7 @@ class Milestone1GUI(Plugin):
 	    return
         x = book.getXCoordinate()
         y = book.getYCoordinate()
-        move_to_shelf(x, y)
+        self.navigation.move_to_shelf(x, y)
 
     def place_on_shelf(self):
 	self.saved_r_arm_pose = Milestone1GUI.PLACE_ON_SHELF_R_POS
