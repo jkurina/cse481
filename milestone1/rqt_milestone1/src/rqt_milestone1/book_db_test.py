@@ -13,3 +13,7 @@ for book in codes.keys():
     print codes.get(book).getSummary()
     print codes.get(book).getPositionMarker()
     print
+
+print db.getBookIdByTitle("The Journal of Computing Sciences in Colleges")
+print db.getBookIdByTitle("Fake Book")
+

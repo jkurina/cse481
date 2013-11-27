@@ -152,7 +152,8 @@ class Milestone1GUI(Plugin):
         button_box.addItem(QtGui.QSpacerItem(20,240))
         large_box.addLayout(button_box)
         self.marker_perception = ReadMarkers()
-        self.book_map = BookDB().getAllBookCodes()
+        self.bookDB = BookDB()
+	self.book_map = self.bookDB.getAllBookCodes()
         print (len(self.book_map))
         self._widget.setObjectName('Milestone1GUI')
         self._widget.setLayout(large_box)
@@ -242,7 +243,35 @@ class Milestone1GUI(Plugin):
         else:
             rospy.logwarn("Give information called when marker id is None")
             self._sound_client.say("I don't think I am holding a book right now")
-  
+    
+    def pick_up_from_shelf_routine(self, book_title):
+	book_id = self.bookDB.getBookIdByTitle(book_title)
+	if book_id is None:
+	    rospy.logwarn("Book asked for was not present in database")
+	    self._sound_client.say("The book you requested is not present in the database.")
+	else:
+	    # Need to set the marker_id for navigation
+	    self.prepare_to_navigate() 
+	    self.navigate()  # Navigate to book location
+	    self.pick_up_from_shelf()  # Pick up from the shelf 
+	    self.prepare_to_navigate()
+	    # Set marker_id to help desk location
+	    self.navigate()  # Navigate to designated help desk location
+	    self.give_book()  # Give Book to Human 
+
+    def pick_up_from_shelf():
+	self.saved_r_arm_pose = Milestone1GUI.RETRIEVE_FROM_SHELF_R_POS
+	self.move_arm('r', 4.0, True)  # Increase these numbers for slower movement
+	self.move_base(True)
+	self.r_gripper.open_gripper(False)
+	self.move_base(False)
+
+    def give_book()
+	self.saved_r_arm_pose = Milestone1GUI.RECIEVE_FROM_HUMAN_R_POS
+	self.move_arm('r', 4.0, True)
+	self.r_gripper.open_gripper(True)
+	
+
     # Moves forward to the bookshelf (or backward if isForward is false)
     def move_base(self, isForward):
         topic_name = '/base_controller/command'

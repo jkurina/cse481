@@ -41,6 +41,16 @@ class BookDB:
         def getAllBookCodes(self):
             return self.book_dict
 
+        def getBookIdByTitle(self, book_title):
+	    if book_title is None:
+	        return None
+	    else:
+	        book_id = None
+	        for key in self.book_dict.keys():
+		    if self.book_dict.get(key).getTitle() == book_title:
+		        book_id = key
+	        return book_id
+
     def __init__(self):
         if BookDB.instance is None:
             BookDB.instance = BookDB.Singleton()
@@ -48,3 +58,7 @@ class BookDB:
     # return a dict, from name to book_attributes
     def getAllBookCodes(self):
         return BookDB.instance.getAllBookCodes()
+
+    # returns the book_id for the given title, None if does not exist
+    def getBookIdByTitle(self, book_title):
+	return BookDB.instance.getBookIdByTitle(book_title)
