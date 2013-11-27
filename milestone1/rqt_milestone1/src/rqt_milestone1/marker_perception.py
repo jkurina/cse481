@@ -22,6 +22,9 @@ class ReadMarkers():
 
     def get_marker_id(self):
         return self.marker_id
+    
+    def set_marker_id(self, marker_id):
+	self.marker_id = marker_id
 
     def reset_marker_id(self):
         self.marker_id = None        

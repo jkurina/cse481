@@ -251,6 +251,7 @@ class Milestone1GUI(Plugin):
 	    self._sound_client.say("The book you requested is not present in the database.")
 	else:
 	    # Need to set the marker_id for navigation
+	    self.marker_perception.set_marker_id(book_id)
 	    self.prepare_to_navigate() 
 	    self.navigate()  # Navigate to book location
 	    self.pick_up_from_shelf()  # Pick up from the shelf 
@@ -266,7 +267,7 @@ class Milestone1GUI(Plugin):
 	self.r_gripper.open_gripper(False)
 	self.move_base(False)
 
-    def give_book()
+    def give_book():
 	self.saved_r_arm_pose = Milestone1GUI.RECIEVE_FROM_HUMAN_R_POS
 	self.move_arm('r', 4.0, True)
 	self.r_gripper.open_gripper(True)
