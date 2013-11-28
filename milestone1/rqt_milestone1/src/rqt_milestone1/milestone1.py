@@ -274,9 +274,8 @@ class Milestone1GUI(Plugin):
             rospy.logwarn("Give information called when marker id is None")
             self._sound_client.say("I don't think I am holding a book right now")
     
-    def pick_up_from_shelf_routine(self, book_title = "Snow Crash"):
-        book_id = self.bookDB.getBookIdByTitle(book_title)
-        book_id = 2
+    def pick_up_from_shelf_routine(self, book_id = 2):
+        # book_id = self.bookDB.getBookIdByTitle(book_title)
         if book_id is None:
             rospy.logwarn("Book asked for was not present in database")
             self._sound_client.say("The book you requested is not present in the database.")
