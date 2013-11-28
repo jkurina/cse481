@@ -5,5 +5,5 @@
   <include file="$(find ar_track_alvar)/launch/pr2_indiv.launch" />
   <include file="$(find ar_track_alvar)/launch/kinect.launch" />
   <!-- Kinematics -->
-  <include file="$(find pr2_rviz_ik)/launch/ik_robot.launch" />
+  <!-- <include file="$(find pr2_rviz_ik)/launch/ik_robot.launch" /> -->
 </launch>
