@@ -126,7 +126,8 @@ class Milestone1GUI(Plugin):
         box_5 = QtGui.QHBoxLayout()
         box_6 = QtGui.QHBoxLayout()
         box_7 = QtGui.QHBoxLayout()
-        
+        box_8 = QtGui.QHBoxLayout()
+
         box_1.addItem(QtGui.QSpacerItem(15,2))
         box_1.addWidget(self.create_button('Prepare To Take', self.prepare_to_take))
         box_1.addItem(QtGui.QSpacerItem(445,2))
@@ -156,9 +157,13 @@ class Milestone1GUI(Plugin):
         box_7.addWidget(self.create_button('Navigate To Person', self.navigate_to_person))
         box_7.addItem(QtGui.QSpacerItem(445,2))
 
-        box_7.addItem(QtGui.QSpacerItem(15,2))
-        box_7.addWidget(self.create_button('Pick Up Book', self.pick_up_from_shelf_routine))
-        box_7.addItem(QtGui.QSpacerItem(445,2))
+	self.book_textbox = QtGui.QLineEdit()
+	self.book_textbox.setFixedWidth(100)
+
+        box_8.addItem(QtGui.QSpacerItem(15,2))
+	box_8.addWidget(self.book_textbox)
+        box_8.addWidget(self.create_button('Pick Up Book', self.pick_up_from_shelf_button))
+        box_8.addItem(QtGui.QSpacerItem(445,2))
         
         button_box.addItem(QtGui.QSpacerItem(20,120))
         button_box.addLayout(box_1)
@@ -168,6 +173,7 @@ class Milestone1GUI(Plugin):
         button_box.addLayout(box_4)
         button_box.addLayout(box_6)
         button_box.addLayout(box_7)
+	button_box.addLayout(box_8)
         button_box.addItem(QtGui.QSpacerItem(20,240))
         large_box.addLayout(button_box)
         self.marker_perception = ReadMarkers()
@@ -219,18 +225,20 @@ class Milestone1GUI(Plugin):
         self.saved_r_arm_pose = Milestone1GUI.NAVIGATE_R_POS
         self.move_arm('r', 5.0)  # Increase these numbers for slower movement
 
-    def navigate_to_shelf(self):
+    def navigate_to_shelf(self, marker_id = None):
         # Move forward, place book on the shelf, and move back
-        marker_id = self.marker_perception.get_marker_id()
+	if marker_id is None or marker_id is False:
+	    marker_id = self.marker_perception.get_marker_id()
         rospy.loginfo("marker id returned by get_marker_id is: " + str(marker_id))
+	if marker_id is False:
+            rospy.loginfo("wuuuuuuuut")
         if marker_id is None:
             self._sound_client.say("I don't think I am holding a book "
                     "right now")
             rospy.logwarn("Navigate to shelf called when marker id is None")
             return
-        
         book = self.book_map.get(unicode(marker_id))
-        if book is None:
+	if book is None:
             self._sound_client.say("The book that I am holding is unknown "
                     "to me")
             rospy.logwarn("Navigate to shelf called when marker id is not in database")
@@ -274,8 +282,11 @@ class Milestone1GUI(Plugin):
             rospy.logwarn("Give information called when marker id is None")
             self._sound_client.say("I don't think I am holding a book right now")
     
-    def pick_up_from_shelf_routine(self, book_id = 2):
-        # book_id = self.bookDB.getBookIdByTitle(book_title)
+    def pick_up_from_shelf_button(self):
+	self.pick_up_from_shelf_routine(self.book_textbox.text())
+
+    def pick_up_from_shelf_routine(self, book_title):
+	book_id = self.bookDB.getBookIdByTitle(book_title)
         if book_id is None:
             rospy.logwarn("Book asked for was not present in database")
             self._sound_client.say("The book you requested is not present in the database.")
@@ -284,9 +295,10 @@ class Milestone1GUI(Plugin):
             self.saved_l_arm_pose = Milestone1GUI.TUCKED_UNDER_L_POS
             self.move_arm('l', 5.0)
             self.l_gripper.close_gripper()
-            self.marker_perception.set_marker_id(book_id)
+            
+	    self.marker_perception.set_marker_id(book_id)
             self.prepare_to_navigate() 
-            self.navigate_to_shelf()  # Navigate to book location
+            self.navigate_to_shelf(book_id)  # Navigate to book location
             self.pick_up_from_shelf()  # Pick up from the shelf 
             self.prepare_to_navigate()
             time.sleep(5)
