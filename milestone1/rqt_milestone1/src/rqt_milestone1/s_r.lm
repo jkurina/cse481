@@ -1,0 +1,57 @@
+Language model created by QuickLM on Tue Nov 26 14:49:48 EST 2013
+Copyright (c) 1996-2010 Carnegie Mellon University and Alexander I. Rudnicky
+
+The model is in standard ARPA format, designed by Doug Paul while he was at MITRE.
+
+The code that was used to produce this language model is available in Open Source.
+Please visit http://www.speech.cs.cmu.edu/tools/ for more information
+
+The (fixed) discount mass is 0.5. The backoffs are computed using the ratio method.
+This model based on a corpus of 8 sentences and 10 words
+
+\data\
+ngram 1=10
+ngram 2=16
+ngram 3=8
+
+\1-grams:
+-0.7782 </s> -0.3010
+-0.7782 <s> -0.2218
+-1.6812 BRING-ME-A-BOOK -0.2218
+-1.6812 GIVE-ME-INFORMATION-ON-THIS-BOOK -0.2218
+-1.6812 HERE-YOU-GO -0.2218
+-1.6812 HERTZIAN-TALES -0.2218
+-1.6812 PUT-THIS-BOOK-BACK -0.2218
+-1.6812 SNOW-CRASH -0.2218
+-1.6812 THE-JOURNAL-OF-CS -0.2218
+-1.6812 THE-OBJECT-DATABASE-STANDARD -0.2218
+
+\2-grams:
+-1.2041 <s> BRING-ME-A-BOOK 0.0000
+-1.2041 <s> GIVE-ME-INFORMATION-ON-THIS-BOOK 0.0000
+-1.2041 <s> HERE-YOU-GO 0.0000
+-1.2041 <s> HERTZIAN-TALES 0.0000
+-1.2041 <s> PUT-THIS-BOOK-BACK 0.0000
+-1.2041 <s> SNOW-CRASH 0.0000
+-1.2041 <s> THE-JOURNAL-OF-CS 0.0000
+-1.2041 <s> THE-OBJECT-DATABASE-STANDARD 0.0000
+-0.3010 BRING-ME-A-BOOK </s> -0.3010
+-0.3010 GIVE-ME-INFORMATION-ON-THIS-BOOK </s> -0.3010
+-0.3010 HERE-YOU-GO </s> -0.3010
+-0.3010 HERTZIAN-TALES </s> -0.3010
+-0.3010 PUT-THIS-BOOK-BACK </s> -0.3010
+-0.3010 SNOW-CRASH </s> -0.3010
+-0.3010 THE-JOURNAL-OF-CS </s> -0.3010
+-0.3010 THE-OBJECT-DATABASE-STANDARD </s> -0.3010
+
+\3-grams:
+-0.3010 <s> BRING-ME-A-BOOK </s>
+-0.3010 <s> GIVE-ME-INFORMATION-ON-THIS-BOOK </s>
+-0.3010 <s> HERE-YOU-GO </s>
+-0.3010 <s> HERTZIAN-TALES </s>
+-0.3010 <s> PUT-THIS-BOOK-BACK </s>
+-0.3010 <s> SNOW-CRASH </s>
+-0.3010 <s> THE-JOURNAL-OF-CS </s>
+-0.3010 <s> THE-OBJECT-DATABASE-STANDARD </s>
+
+\end\

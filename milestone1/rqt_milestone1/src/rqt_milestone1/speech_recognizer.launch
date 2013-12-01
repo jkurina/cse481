@@ -1,0 +1,8 @@
+<launch>
+
+  <node name="recognizer" pkg="pocketsphinx" type="recognizer.py" output="screen">
+    <param name="lm" value="$(find rqt_milestone1)/src/rqt_milestone1/s_r.lm"/>
+    <param name="dict" value="$(find rqt_milestone1)/src/rqt_milestone1/s_r.dic"/>
+  </node>
+
+</launch>
