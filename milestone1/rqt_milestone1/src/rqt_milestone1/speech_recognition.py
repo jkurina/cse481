@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 import rospy
+import string
+import re
 import milestone1
 from std_msgs.msg import String
 from sound_play.msg import SoundRequest
@@ -19,13 +21,15 @@ class SpeechRecognition():
 
     def create_closure(self):
         def callback(data):
-            print ("Received command: %s" % data.data)
+            print ("Received command: '%s'" % data.data)
             if not self.is_listening:
                 print ("Lalalala I'm not listening")
                 return
             if self.looking_for_a_book:
                 self.looking_for_a_book = False
                 self.is_listening = False
+                data.data = re.sub("-", " ", data.data)
+                data.data = string.capwords(data.data)
                 print ("Picking up book %s" % data.data)
                 self.command(data.data)
                 self.command = None
@@ -35,16 +39,16 @@ class SpeechRecognition():
                 self.command = self.milestone1.get_function(data.data)
                 if self.command is None:
                     self.say("I don't understand how to %s" % data.data)
-                elif self.command is "BRING-ME-A-BOOK":
+                elif data.data == "bring-me-a-book":
                     self.say("What book would you like?")
                     self.looking_for_a_book = True
                 else:
                     self.say("Do you want me to %s?" % data.data)
             else:
-                if data is not "YES":
+                if data.data == "no":
                     print ("Cancelling command.")
                     self.command = None
-                else:
+                elif data.data == "yes":
                     self.say("Executing command!")
                     self.is_listening = False
                     self.command()
