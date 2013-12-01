@@ -26,9 +26,13 @@ from navigation import Navigation
 from gripper import Gripper
 from torso import Torso
 from marker_perception import ReadMarkers
+from speech_recognition import SpeechRecognition
 from book_db import BookDB
 from book import Book
 from head import Head
+from control_msgs.msg import PointHeadAction
+from control_msgs.msg import PointHeadGoal
+from actionlib_msgs.msg import GoalStatus
 import os
 import time
 
@@ -157,11 +161,11 @@ class Milestone1GUI(Plugin):
         box_7.addWidget(self.create_button('Navigate To Person', self.navigate_to_person))
         box_7.addItem(QtGui.QSpacerItem(445,2))
 
-	self.book_textbox = QtGui.QLineEdit()
-	self.book_textbox.setFixedWidth(100)
+        self.book_textbox = QtGui.QLineEdit()
+        self.book_textbox.setFixedWidth(100)
 
         box_8.addItem(QtGui.QSpacerItem(15,2))
-	box_8.addWidget(self.book_textbox)
+        box_8.addWidget(self.book_textbox)
         box_8.addWidget(self.create_button('Pick Up Book', self.pick_up_from_shelf_button))
         box_8.addItem(QtGui.QSpacerItem(445,2))
         
@@ -173,10 +177,11 @@ class Milestone1GUI(Plugin):
         button_box.addLayout(box_4)
         button_box.addLayout(box_6)
         button_box.addLayout(box_7)
-	button_box.addLayout(box_8)
+        button_box.addLayout(box_8)
         button_box.addItem(QtGui.QSpacerItem(20,240))
         large_box.addLayout(button_box)
         self.marker_perception = ReadMarkers()
+        self.speech_recognition = SpeechRecognition(self)
         self.bookDB = BookDB()
         self.book_map = self.bookDB.getAllBookCodes()
         print (len(self.book_map))
@@ -186,6 +191,22 @@ class Milestone1GUI(Plugin):
         self._widget.setStyleSheet("QWidget { image: url(%s) }" %
                 (str(os.path.dirname(os.path.realpath(__file__))) +
                 "/../../librarian_gui_background.jpg"))
+
+    def get_function(self, text):
+        functions = {
+            "bring-me-a-book":
+                self.pick_up_from_shelf_routine,
+            "put-this-book-back":
+                self.prepare_to_take,
+            "give-me-information-on-this-book":
+                self.give_information,
+            "here-you-go":
+                self.put_this_book_back_routine,
+        }
+        if text not in functions:
+            print ("Could not find key %s" % text)
+            return None
+        return functions[text]
 
     def sound_cb(self, sound_request):
         qWarning('Received sound.')
@@ -216,9 +237,27 @@ class Milestone1GUI(Plugin):
         time.sleep(1)
         self.saved_r_arm_pose = Milestone1GUI.READ_FIDUCIAL_R_POS
         self.move_arm('r', 5.0)  # Increase these numbers for slower movement
+        self.look_at_r_gripper()
         rospy.loginfo("marker id returned by get_marker_id is: " + 
                  str(self.marker_perception.get_marker_id()))
 
+    def look_at_r_gripper(self):
+        name_space = '/head_traj_controller/point_head_action'
+
+        head_client = SimpleActionClient(name_space, PointHeadAction)
+        head_client.wait_for_server()
+
+        head_goal = PointHeadGoal()
+        head_goal.target.header.frame_id = "r_gripper_tool_frame"
+        head_goal.min_duration = rospy.Duration(0.3)
+        head_goal.target.point = Point(0, 0, 0)
+        head_goal.max_velocity = 1.0
+        head_client.send_goal(head_goal)
+        head_client.wait_for_result(rospy.Duration(5.0))
+
+        if (head_client.get_state() != GoalStatus.SUCCEEDED):
+            rospy.logwarn('Head action unsuccessful.')
+        
     def prepare_to_navigate(self):
         self.marker_perception.is_listening = False
         # Tuck arms
@@ -227,10 +266,10 @@ class Milestone1GUI(Plugin):
 
     def navigate_to_shelf(self, marker_id = None):
         # Move forward, place book on the shelf, and move back
-	if marker_id is None or marker_id is False:
-	    marker_id = self.marker_perception.get_marker_id()
+        if marker_id is None or marker_id is False:
+            marker_id = self.marker_perception.get_marker_id()
         rospy.loginfo("marker id returned by get_marker_id is: " + str(marker_id))
-	if marker_id is False:
+        if marker_id is False:
             rospy.loginfo("wuuuuuuuut")
         if marker_id is None:
             self._sound_client.say("I don't think I am holding a book "
@@ -238,7 +277,7 @@ class Milestone1GUI(Plugin):
             rospy.logwarn("Navigate to shelf called when marker id is None")
             return
         book = self.book_map.get(unicode(marker_id))
-	if book is None:
+        if book is None:
             self._sound_client.say("The book that I am holding is unknown "
                     "to me")
             rospy.logwarn("Navigate to shelf called when marker id is not in database")
@@ -283,10 +322,10 @@ class Milestone1GUI(Plugin):
             self._sound_client.say("I don't think I am holding a book right now")
     
     def pick_up_from_shelf_button(self):
-	self.pick_up_from_shelf_routine(self.book_textbox.text())
+        self.pick_up_from_shelf_routine(self.book_textbox.text())
 
     def pick_up_from_shelf_routine(self, book_title):
-	book_id = self.bookDB.getBookIdByTitle(book_title)
+        book_id = self.bookDB.getBookIdByTitle(book_title)
         if book_id is None:
             rospy.logwarn("Book asked for was not present in database")
             self._sound_client.say("The book you requested is not present in the database.")
@@ -296,7 +335,7 @@ class Milestone1GUI(Plugin):
             self.move_arm('l', 5.0)
             self.l_gripper.close_gripper()
             
-	    self.marker_perception.set_marker_id(book_id)
+            #  self.marker_perception.set_marker_id(book_id)
             self.prepare_to_navigate() 
             self.navigate_to_shelf(book_id)  # Navigate to book location
             self.pick_up_from_shelf()  # Pick up from the shelf 
@@ -304,6 +343,15 @@ class Milestone1GUI(Plugin):
             time.sleep(5)
             self.navigate_to_person()  # Navigate to designated help desk location
             self.give_book()  # Give Book to Human 
+
+    def put_this_book_back_routine(self):
+        self.take_from_human()
+        # TODO: pause/check here?
+        self.prepare_to_navigate()
+        self.navigate_to_shelf()
+        self.place_on_shelf()
+        self.prepare_to_navigate()
+        # TODO: return to human?
 
     def pick_up_from_shelf(self):
         self.saved_r_arm_pose = Milestone1GUI.LOWER_ON_SHELF_R_POS
