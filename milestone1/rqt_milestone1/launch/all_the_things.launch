@@ -6,4 +6,6 @@
   <!--<include file="$(find ar_track_alvar)/launch/kinect.launch" />-->
   <!-- Kinematics -->
   <!-- <include file="$(find pr2_rviz_ik)/launch/ik_desktop.launch" /> -->
+  <!-- Speech -->
+  <include file="speech_recognizer.launch" />
 </launch>
