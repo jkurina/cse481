@@ -14,7 +14,9 @@ GO - Main [base]
 pronounce: verbosity is 1
 HERTZIAN - By LtoS rules
 TALES - Main [base] 
-NO - Main 
+NO - Main [base] 
+THANK - Main [base] 
+YOU - Main [base] 
 PUT - Main [base] 
 THIS - Main [base] 
 BOOK - Main [base] 
@@ -31,5 +33,6 @@ THE - Main [base]
 OBJECT - Main [base] 
 DATABASE - Main [base] 
 STANDARD - Main [base] 
-YES - Main 
+YES - Main [base] 
+PLEASE - Main [base] 
 

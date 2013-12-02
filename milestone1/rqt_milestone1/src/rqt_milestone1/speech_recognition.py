@@ -26,6 +26,7 @@ class SpeechRecognition():
                 print ("Lalalala I'm not listening")
                 return
             if self.looking_for_a_book:
+		print ("Looking for a book...")
                 self.looking_for_a_book = False
                 self.is_listening = False
                 data.data = re.sub("-", " ", data.data)
@@ -43,12 +44,15 @@ class SpeechRecognition():
                     self.say("What book would you like?")
                     self.looking_for_a_book = True
                 else:
-                    self.say("Do you want me to %s?" % data.data)
+                    self.say("Did you say %s?" % data.data)
             else:
-                if data.data == "no":
+		print ("Waiting for confirmation...")
+                if data.data == "no-thank-you":
                     print ("Cancelling command.")
+		    self.say("Cancelling command.")
                     self.command = None
-                elif data.data == "yes":
+                elif data.data == "yes-please":
+		    print ("Executing command!")
                     self.say("Executing command!")
                     self.is_listening = False
                     self.command()
