@@ -35,6 +35,7 @@ from control_msgs.msg import PointHeadGoal
 from actionlib_msgs.msg import GoalStatus
 import os
 import time
+import math
 
 
 class Milestone1GUI(Plugin):
@@ -131,7 +132,8 @@ class Milestone1GUI(Plugin):
         box_6 = QtGui.QHBoxLayout()
         box_7 = QtGui.QHBoxLayout()
         box_8 = QtGui.QHBoxLayout()
-
+        box_9 = QtGui.QHBoxLayout()
+        
         box_1.addItem(QtGui.QSpacerItem(15,2))
         box_1.addWidget(self.create_button('Prepare To Take', self.prepare_to_take))
         box_1.addItem(QtGui.QSpacerItem(445,2))
@@ -169,6 +171,11 @@ class Milestone1GUI(Plugin):
         box_8.addWidget(self.create_button('Pick Up Book', self.pick_up_from_shelf_button))
         box_8.addItem(QtGui.QSpacerItem(445,2))
         
+        box_9.addItem(QtGui.QSpacerItem(15,2))
+        box_9.addWidget(self.book_textbox)
+        box_9.addWidget(self.create_button('Localize', self.spin_base))
+        box_9.addItem(QtGui.QSpacerItem(445,2))
+        
         button_box.addItem(QtGui.QSpacerItem(20,120))
         button_box.addLayout(box_1)
         button_box.addLayout(box_2)
@@ -178,13 +185,13 @@ class Milestone1GUI(Plugin):
         button_box.addLayout(box_6)
         button_box.addLayout(box_7)
         button_box.addLayout(box_8)
+        button_box.addLayout(box_9)
         button_box.addItem(QtGui.QSpacerItem(20,240))
         large_box.addLayout(button_box)
         self.marker_perception = ReadMarkers()
         self.speech_recognition = SpeechRecognition(self)
         self.bookDB = BookDB()
         self.book_map = self.bookDB.getAllBookCodes()
-        print (len(self.book_map))
         self._widget.setObjectName('Milestone1GUI')
         self._widget.setLayout(large_box)
         context.add_widget(self._widget)
@@ -263,6 +270,30 @@ class Milestone1GUI(Plugin):
         # Tuck arms
         self.saved_r_arm_pose = Milestone1GUI.NAVIGATE_R_POS
         self.move_arm('r', 5.0)  # Increase these numbers for slower movement
+        
+    #spin 360 * rotate_count degress clock wise
+    def spin_base(self, rotate_count):
+        # Adjust height and tuck arms before localization
+        self._sound_client.say("Please wait while I orient myself.")
+        self.torso.move(.15)
+        self.saved_l_arm_pose = Milestone1GUI.TUCKED_UNDER_L_POS
+        self.saved_r_arm_pose = Milestone1GUI.NAVIGATE_R_POS       
+        self.move_arm('l', 5.0, True)
+        self.move_arm('r', 5.0, True)
+        self.l_gripper.close_gripper()
+        self.r_gripper.close_gripper()
+        
+        if not rotate_count:
+            rotate_count = 2
+        topic_name = '/base_controller/command'
+        base_publisher = rospy.Publisher(topic_name, Twist)
+
+        twist_msg = Twist()
+        twist_msg.linear = Vector3(0.0, 0.0, 0.0)
+        twist_msg.angular = Vector3(0.0, 0.0, rotate_count * math.pi)
+        start_time = rospy.get_rostime()
+        while rospy.get_rostime() < start_time + rospy.Duration(3.0 * rotate_count):
+            base_publisher.publish(twist_msg)
 
     def navigate_to_shelf(self, marker_id = None):
         # Move forward, place book on the shelf, and move back
@@ -276,6 +307,7 @@ class Milestone1GUI(Plugin):
                     "right now")
             rospy.logwarn("Navigate to shelf called when marker id is None")
             return
+              
         book = self.book_map.get(unicode(marker_id))
         if book is None:
             self._sound_client.say("The book that I am holding is unknown "
@@ -337,6 +369,7 @@ class Milestone1GUI(Plugin):
             
             #  self.marker_perception.set_marker_id(book_id)
             self.prepare_to_navigate() 
+            time.sleep(5)
             self.navigate_to_shelf(book_id)  # Navigate to book location
             self.pick_up_from_shelf()  # Pick up from the shelf 
             self.prepare_to_navigate()
@@ -346,8 +379,9 @@ class Milestone1GUI(Plugin):
 
     def put_this_book_back_routine(self):
         self.take_from_human()
-        # TODO: pause/check here?
+        time.sleep(5)
         self.prepare_to_navigate()
+        time.sleep(5)
         self.navigate_to_shelf()
         self.place_on_shelf()
         self.prepare_to_navigate()
