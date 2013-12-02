@@ -172,7 +172,6 @@ class Milestone1GUI(Plugin):
         box_8.addItem(QtGui.QSpacerItem(445,2))
         
         box_9.addItem(QtGui.QSpacerItem(15,2))
-        box_9.addWidget(self.book_textbox)
         box_9.addWidget(self.create_button('Localize', self.spin_base))
         box_9.addItem(QtGui.QSpacerItem(445,2))
         
