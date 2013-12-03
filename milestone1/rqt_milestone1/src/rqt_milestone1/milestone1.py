@@ -242,7 +242,7 @@ class Milestone1GUI(Plugin):
         self._sound_client.say("Thank you")
         time.sleep(1)
         self.saved_r_arm_pose = Milestone1GUI.READ_FIDUCIAL_R_POS
-        self.move_arm('r', 5.0)  # Increase these numbers for slower movement
+        self.move_arm('r', 5.0, True)  # Increase these numbers for slower movement
         self.look_at_r_gripper()
         rospy.loginfo("marker id returned by get_marker_id is: " + 
                  str(self.marker_perception.get_marker_id()))
@@ -291,7 +291,7 @@ class Milestone1GUI(Plugin):
         twist_msg.linear = Vector3(0.0, 0.0, 0.0)
         twist_msg.angular = Vector3(0.0, 0.0, 0.5)
         start_time = rospy.get_rostime()
-        while rospy.get_rostime() < start_time + rospy.Duration(3.0 * rotate_count):
+        while rospy.get_rostime() < start_time + rospy.Duration(15.0 * rotate_count):
             base_publisher.publish(twist_msg)
 
     def navigate_to_shelf(self, marker_id = None):
