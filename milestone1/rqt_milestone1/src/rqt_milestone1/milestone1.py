@@ -133,7 +133,8 @@ class Milestone1GUI(Plugin):
         box_7 = QtGui.QHBoxLayout()
         box_8 = QtGui.QHBoxLayout()
         box_9 = QtGui.QHBoxLayout()
-        
+        box_10 = QtGui.QHBoxLayout()
+
         box_1.addItem(QtGui.QSpacerItem(15,2))
         box_1.addWidget(self.create_button('Prepare To Take', self.prepare_to_take))
         box_1.addItem(QtGui.QSpacerItem(445,2))
@@ -174,7 +175,11 @@ class Milestone1GUI(Plugin):
         box_9.addItem(QtGui.QSpacerItem(15,2))
         box_9.addWidget(self.create_button('Localize', self.spin_base))
         box_9.addItem(QtGui.QSpacerItem(445,2))
-        
+       
+        box_10.addItem(QtGui.QSpacerItem(15,2))
+        box_10.addWidget(self.create_button('Non-nav Pick Up', self.pick_up_from_shelf))
+        box_10.addItem(QtGui.QSpacerItem(445,2))
+
         button_box.addItem(QtGui.QSpacerItem(20,120))
         button_box.addLayout(box_1)
         button_box.addLayout(box_2)
@@ -185,6 +190,7 @@ class Milestone1GUI(Plugin):
         button_box.addLayout(box_7)
         button_box.addLayout(box_8)
         button_box.addLayout(box_9)
+        button_box.addLayout(box_10)
         button_box.addItem(QtGui.QSpacerItem(20,240))
         large_box.addLayout(button_box)
         self.marker_perception = ReadMarkers()
