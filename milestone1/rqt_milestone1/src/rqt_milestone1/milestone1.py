@@ -391,7 +391,7 @@ class Milestone1GUI(Plugin):
         if book_id is None:
             rospy.logwarn("Book asked for was not present in database")
             self._sound_client.say("The book you requested is not present in the database.")
-	book = self.book_map.get(unicode(marker_id))
+	book = self.book_map.get(unicode(book_id))
 	self._sound_client.say(book.getInformation())
 	
 
