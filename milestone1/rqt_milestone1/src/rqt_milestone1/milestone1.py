@@ -204,8 +204,8 @@ class Milestone1GUI(Plugin):
                 self.pick_up_from_shelf_routine,
             "put-this-book-back":
                 self.prepare_to_take,
-            "give-me-information-on-this-book":
-                self.give_information,
+            "give-me-information":
+                self.give_information_routine,
             "here-you-go":
                 self.put_this_book_back_routine,
         }
@@ -385,6 +385,15 @@ class Milestone1GUI(Plugin):
         self.place_on_shelf()
         self.prepare_to_navigate()
         # TODO: return to human?
+
+    def give_information_routine(self, book_title):
+	book_id = self.bookDB.getBookIdByTitle(book_title)
+        if book_id is None:
+            rospy.logwarn("Book asked for was not present in database")
+            self._sound_client.say("The book you requested is not present in the database.")
+	book = self.book_map.get(unicode(marker_id))
+	self._sound_client.say(book.getInformation())
+	
 
     def pick_up_from_shelf(self):
         self.saved_r_arm_pose = Milestone1GUI.LOWER_ON_SHELF_R_POS
