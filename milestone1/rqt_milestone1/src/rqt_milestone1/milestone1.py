@@ -242,7 +242,7 @@ class Milestone1GUI(Plugin):
         self._sound_client.say("Thank you")
         time.sleep(1)
         self.saved_r_arm_pose = Milestone1GUI.READ_FIDUCIAL_R_POS
-        self.move_arm('r', 5.0)  # Increase these numbers for slower movement
+        self.move_arm('r', 5.0, True)  # Increase these numbers for slower movement
         self.look_at_r_gripper()
         rospy.loginfo("marker id returned by get_marker_id is: " + 
                  str(self.marker_perception.get_marker_id()))
