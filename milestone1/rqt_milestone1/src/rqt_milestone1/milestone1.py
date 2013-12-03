@@ -291,7 +291,7 @@ class Milestone1GUI(Plugin):
         twist_msg.linear = Vector3(0.0, 0.0, 0.0)
         twist_msg.angular = Vector3(0.0, 0.0, 0.5)
         start_time = rospy.get_rostime()
-        while rospy.get_rostime() < start_time + rospy.Duration(3.0 * rotate_count):
+        while rospy.get_rostime() < start_time + rospy.Duration(15.0 * rotate_count):
             base_publisher.publish(twist_msg)
 
     def navigate_to_shelf(self, marker_id = None):
