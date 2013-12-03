@@ -40,7 +40,7 @@ class SpeechRecognition():
                 self.command = self.milestone1.get_function(data.data)
                 if self.command is None:
                     self.say("I don't understand how to %s" % data.data)
-                elif data.data == "bring-me-a-book" or data.data == "give-me-information-on-this-book":
+                elif data.data == "bring-me-a-book" or data.data == "give-me-information":
                     self.say("What book would you like?")
                     self.looking_for_a_book = True
                 else:

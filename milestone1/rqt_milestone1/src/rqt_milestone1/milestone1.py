@@ -204,7 +204,7 @@ class Milestone1GUI(Plugin):
                 self.pick_up_from_shelf_routine,
             "put-this-book-back":
                 self.prepare_to_take,
-            "give-me-information-on-this-book":
+            "give-me-information":
                 self.give_information_routine,
             "here-you-go":
                 self.put_this_book_back_routine,
