@@ -1,10 +1,32 @@
-This directory contains team 2's code for milestone 1.
+This directory contains team 2's code for milestone 2.
 
-1) To start up the gui, run rqt. Our gui is called Squirtle Milestone 1.
-2) To test out the navigation, run:
-a) rosrun map_server map_server basement_map.yaml in a terminal window
-b) realrobot && roslaunch pr2_navigation_global rviz_move_base.launch in another window
-c) ssh to c1 and run roslaunch pr2_2dnav pr2_2dnav.launch in another window
-Then, help the robot localize
+*Be sure to always run realrobot on new terminals
+
+1) First claim and start Rosie
+2) Bring up the dashboard and click the start button on the remote
+3) On c1, roslaunch robot_all_the_things.launch from milestone1/rqt_milestone1/launch
+4) On the local machine, roslaunch all_the_things.launch from milestone1/rqt_milestone1/launch
+5) Then on a new tab, ssh -X c1 and run rqt
+6) Here is an overview of the available speech commands:
+* Bring me a book: Used to make Rosie bring you a book from the bookshelf
+* Give me information: Used to ask Rosie to give you information on a book
+* Here you go: Used when you want Rosie to close her gripper after receiving a book from you
+* No, thank you: Used to cancel the previous command given to Rosie
+* Yes, please: Used to approve the previous command given to Rosie
+* Put this book back: Used to ask Rosie to take a book from you and place it on the bookshelf
+* Snow crash: One of the books in the book database. Used when asking Rosie to bring you a book or give you information on a book.
+* The journal of CS: Another of the books in the book database
+* The object database standard: Another of the books in the database
+7) Here is an overview of the available buttons on the GUI:
+* Prepare to take: The robot tucks its left arm. It then moves its right arm and opens its right gripper to receive a book.
+* Take from human: The robot closes its gripper onto the book given by a human. Then it raises the book to read the ar marker on it.
+* Prepare to navigate: The robot tucks its arms in preparation to navigate
+* Navigate to shelf: The robot navigates to the location specified in the database for the book it is holding. If the robot is not holding a book, or if the robot has not read the marker on the book, it will say so and refuse to navigate .
+* Place on shelf: The robot places the book it is holding on the shelf. This assumes that it has successfully navigated to the nav goal specified for the book it is holding.
+* Give information: The robot gives a summary of the book it is holding. Unlike the speech command version, you cannot ask the robot for information on any book in the database using this button- it will only give information on the book it is holding. If it is not holding a book, it will say so.
+* Navigate to person: The robot navigates to the center of the room.
+* Pick up book: The robot tucks its arms and navigates to the shelf, using the nav goal specified for the book name typed in the textbox next to the button. In then picks up this book, and navigates to the center of the room. Once it’s there, it opens its gripper to release the book.
+* Localize: The robot spins multiple times to orient itself.
+* Non-nav pick up:  This button can be used as a back-up when navigation isn’t working. It picks up a book from the shelf, assuming that the robot is currently in the correct position for the book.
 
 All code (and maps) is in rqt_milestone1/src/rqt_milestone1
