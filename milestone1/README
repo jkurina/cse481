@@ -14,8 +14,7 @@ This directory contains team 2's code for milestone 2.
 * No, thank you: Used to cancel the previous command given to Rosie
 * Yes, please: Used to approve the previous command given to Rosie
 * Put this book back: Used to ask Rosie to take a book from you and place it on the bookshelf
-7) In addition, Rosie recognizes the books currently in the database. Their names can be used when asking Rosie to bring you a book or give you information on a book.
-These books are:
+7) In addition, Rosie recognizes the books currently in the database. This allows you to specify a book by name asking Rosie to bring you a book or give you information on a book. The books are:
 * Snow crash
 * The journal of CS
 * The object database standard
