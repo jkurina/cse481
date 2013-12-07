@@ -30,4 +30,5 @@ This directory contains team 2's code for milestone 2.
 * Localize: The robot spins multiple times to orient itself.
 * Non-nav pick up:  This button can be used as a back-up when navigation isn’t working. It picks up a book from the shelf, assuming that the robot is currently in the correct position for the book.
 
-All code (and maps) is in rqt_milestone1/src/rqt_milestone1. We didn't include the ar_track_alvar package because it made our tarball to big to upload :(
+All code (and maps) is in rqt_milestone1/src/rqt_milestone1.
+We didn't include the ar_track_alvar package or the move_base_msgs package because it made our tarball to big to upload :( To download the move_base_msgs package, clone https://github.com/jonbinney/navigation/tree/groovy-devel-catkinized-1 and copy the move_base_msgs directory into your catkin workspace
